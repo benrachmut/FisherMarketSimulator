@@ -31,12 +31,14 @@ public class FisherSolverCentralistic extends FisherSolver {
 
 		// next iteration: calculates prices, calculates current valuation and
 		// update the bids
-		public Double[][] iterate() {
+		public FisherData iterate() {
 			updateBidsUsingUtilites();
 			updatePriceVectorUsingBids();
 			updateCurrentAllocationMatrixAndChanges();
+			FisherData ans = new FisherDataCentralistic(currentAllocation, this.R, iterations, market);
+
 			//generateAllocations();
-			return currentAllocation;
+			return ans;
 		}
 
 		
@@ -88,7 +90,7 @@ public class FisherSolverCentralistic extends FisherSolver {
 		//-----------METHODS OF updateCurrentAllocationMatrixAndChanges------
 
 		private void updateCurrentAllocation(int i, int j) {
-			if (bids[i][j]/prices[j] > THRESHOLD) {
+			if (bids[i][j]/prices[j] > MainSimulator.THRESHOLD) {
 				currentAllocation[i][j] = bids[i][j] / prices[j];//aaaaa
 			} else {
 				currentAllocation[i][j] = null;

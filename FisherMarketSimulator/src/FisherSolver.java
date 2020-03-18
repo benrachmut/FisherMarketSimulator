@@ -1,8 +1,8 @@
+import java.util.ArrayList;
 import java.util.List;
 
 public abstract class FisherSolver {
 
-	protected static final double THRESHOLD = 1E-4;
 	protected Market market;
 	protected int iterations;
 	protected double change;
@@ -16,6 +16,7 @@ public abstract class FisherSolver {
 		this.R = m.getR();
 		this.iterations = 0;
 		this.change = Double.MAX_VALUE;
+		this.data = new ArrayList<FisherData>();
 	}
 
 	public List<FisherData> algorithm() {
@@ -31,6 +32,8 @@ public abstract class FisherSolver {
 	public abstract FisherData iterate();
 
 	public boolean isStable() {
-		return change < THRESHOLD;
+		boolean isStable = change < MainSimulator.THRESHOLD;
+		boolean isComplete = this.iterations == MainSimulator.maxIteration;
+		return isStable || isComplete;
 	}
 }

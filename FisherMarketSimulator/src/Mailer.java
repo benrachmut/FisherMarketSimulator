@@ -21,11 +21,13 @@ public class Mailer {
 		this.delayUb = delayUb;			
 		this.messageBox= new ArrayList<Message>();
 	}
+	
+	
 
 	public void updateSeeds(long s) {
 		this.rP3= new Random(s+100);
 		this.rP4= new Random(s+200);
-		this.delayUbR.setSeed(s+300);
+		this.delayUbR= new Random(s+300);
 	}
 	
 	
@@ -82,5 +84,17 @@ public class Mailer {
 	public void restart(long i) {		
 		this.messageBox= new ArrayList<Message>();
 		this.updateSeeds(i);
+	}
+
+
+
+	public double getP3() {
+		return this.p3;
+	}
+	public double getP4() {
+		return this.p4;
+	}
+	public int getUB() {
+		return this.delayUb;
 	}
 }

@@ -96,7 +96,7 @@ public class Market {
 
 	public List<Buyer> getBuyers() {
 		// TODO Auto-generated method stub
-		return this.getBuyers();
+		return this.buyers;
 	}
 
 	public List<Good> getGoods() {

@@ -1,22 +1,22 @@
 
-public class LinearUtility extends Utility {
+public class UtilityLinear extends Utility {
 	
 	
 	protected double linearUtility;	
 	
-	public LinearUtility(Buyer buyer, Good good,double linearUtility) {
+	public UtilityLinear(Buyer buyer, Good good,double linearUtility) {
 		super(buyer, good);
 		this.linearUtility = linearUtility;
 	}
 	
 	
-	public LinearUtility(double linearUtility) {
+	public UtilityLinear(double linearUtility) {
 		super();
 		this.linearUtility = linearUtility;
 	}
 
 
-	public LinearUtility(Buyer buyer, Good good) {
+	public UtilityLinear(Buyer buyer, Good good) {
 		super(buyer, good);
 	}
 

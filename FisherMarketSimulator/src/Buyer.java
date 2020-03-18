@@ -37,7 +37,7 @@ public class Buyer implements Messageable {
 			int goodId = g.getId();
 			int goodType = g.getType();
 			double value =MainSimulator.getRandomNorm(goodType, randomUtil);
-			Utility util = new LinearUtility(this,g,value);
+			Utility util = new UtilityLinear(this,g,value);
 			ans.put(g, util);
 		}
 		return ans;
@@ -114,7 +114,7 @@ public class Buyer implements Messageable {
 	private void placeUtilitiesInMap() {
 	
 		for (Good task : this.utilitiesMap.keySet()) {
-			Utility u = new ConcaveUtility(this, task, 1);
+			Utility u = new UtilityConcave(this, task, 1);
 			//this.utilitiesMap.put(task, u);
 			this.updatedUtilitiesMap.put(task, u.getUtility(1));
 		}

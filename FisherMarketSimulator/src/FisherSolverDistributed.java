@@ -55,8 +55,8 @@ public class FisherSolverDistributed extends FisherSolver {
 		sendMessages(receiversMap);
 		updateStability();
 		this.allocation = createCentralisticAllocation();
-		FisherData = new DistrbutedData(this.allocation, this.R, this.iterations,);
-		return allocation;
+		FisherData ans = new FisherDataDistributed(this.allocation, this.R, this.iterations, this.market, this.mailer);
+		return ans;
 	}
 
 	private void updateStability() {
