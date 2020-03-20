@@ -1,6 +1,8 @@
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import com.sun.org.apache.bcel.internal.generic.RETURN;
 
@@ -13,19 +15,22 @@ public class Market {
 	private Random rGoodTypes;
 	private Utility[][] R;
 	private Mailer mailer;
+	private SortedMap<Integer, double[][]> parameterDelayMartix;
 
 	public Market(int buyersNum, int goodsNum, Random rUtil, Random rGoodTypes, int i) {
 		this.id = i;
 		this.rUtil = rUtil;
 		this.rGoodTypes = rGoodTypes;
 		this.goods = createGoods(goodsNum);
-		this.buyers=createBuyers(buyersNum);
+		this.buyers = createBuyers(buyersNum);
 		this.R = createR();
+		this.parameterDelayMartix = new TreeMap<Integer, double[][]>();
 	}
 
 	public int getId() {
 		return this.id;
 	}
+
 	private Utility[][] createR() {
 		Utility[][] ans = new Utility[buyers.size()][goods.size()];
 
@@ -36,6 +41,13 @@ public class Market {
 				ans[i][j] = u;
 			}
 		}
+		return ans;
+	}
+
+	@Override
+	public String toString() {
+		String ans = "Market number: " + id + ", " + "buyers: " + buyers.size() + ", goods: " + goods.size();
+
 		return ans;
 	}
 
@@ -54,6 +66,7 @@ public class Market {
 
 		for (int i = 0; i < goodsNum; i++) {
 			Good g = new Good(getType(), i);
+			ans.add(g);
 		}
 
 		return ans;
@@ -68,26 +81,25 @@ public class Market {
 		return type;
 	}
 
-	public void restartMarketBetweenRuns(Mailer mailer) {
+	public void restartMarketBetweenRuns(Mailer mailer, int parameter) {
 		this.mailer = mailer;
 		this.mailer.updateSeeds(this.id);
+		double[][] parameterMatrix = this.parameterDelayMartix.get(parameter);
+		this.mailer.setParameterMatrix(parameterMatrix);
+
 		this.mailer.emptyMessageBox();
-		
+
 		for (Good g : this.goods) {
 			g.updateMailer(this.mailer);
 			g.resetGoodsBetweenRuns();
 		}
-		
+
 		for (Buyer b : this.buyers) {
 			b.updateMailer(this.mailer);
 			b.resetBuyerBetweenRuns();
 		}
-		
-	}
 
-	
-		
-	
+	}
 
 	public Utility[][] getR() {
 		// TODO Auto-generated method stub
@@ -107,6 +119,37 @@ public class Market {
 	public Mailer getMailer() {
 		// TODO Auto-generated method stub
 		return this.mailer;
+	}
+
+	public void createParameterMatrix(int parameter) {
+
+		double[][] value = new double[R.length][R[0].length];
+
+		if (parameter == 0) {
+			value = setParametersToZero();
+			
+		} else {
+			RandomNumberGenerator pois = RandomNumberGenerator.Poisson;
+			Random r = new Random(id);
+			for (int i = 0; i < R.length; i++) {
+				for (int j = 0; j < R[i].length; j++) {
+					value[i][j] = pois.getRandom(r, parameter);
+				}
+			}
+		}
+
+		this.parameterDelayMartix.put(parameter, value);
+
+	}
+
+	private double[][] setParametersToZero() {
+		double[][] ans = new double[R.length][R[0].length];
+		for (int i = 0; i < R.length; i++) {
+			for (int j = 0; j < R[i].length; j++) {
+				ans[i][j] = 0;
+			}
+		}
+		return ans;
 	}
 
 }

@@ -37,8 +37,8 @@ public class UtilityLinear extends Utility {
 
 	@Override
 	public Object clone() {
-		// TODO Auto-generated method stub
-		return null;
+		UtilityLinear l=new UtilityLinear(this.buyer, this.good, linearUtility);
+		return l;
 	}
 
 	

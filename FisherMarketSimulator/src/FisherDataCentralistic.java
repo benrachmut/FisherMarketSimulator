@@ -6,8 +6,8 @@ public class FisherDataCentralistic extends FisherData {
 		
 	}
 
-	public FisherDataCentralistic(FisherData copiedFisherData) {
-		super(copiedFisherData);
+	public FisherDataCentralistic(FisherData copiedFisherData, int iterationOfCopied) {
+		super(copiedFisherData,iterationOfCopied);
 	}
 
 	public FisherDataCentralistic(int idF, int numByuersF, int numGoodsF, int iterationF, String algoF,

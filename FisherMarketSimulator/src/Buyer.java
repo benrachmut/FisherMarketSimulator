@@ -188,6 +188,15 @@ public class Buyer implements Messageable {
 	}
 
 
+	@Override
+	public int getId() {
+		// TODO Auto-generated method stub
+		return this.id;
+	}
+	
+
+	
+
 	
 	
 

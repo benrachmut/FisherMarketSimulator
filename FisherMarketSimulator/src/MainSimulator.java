@@ -5,58 +5,60 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
 
-
-
 public class MainSimulator {
 
 	// ------- VARIABLES TO CHECK BEFORE STARTING A RUN
 	// -- variables of dcop problem
 
 	public static boolean central = false;
-	protected static final double THRESHOLD = 1E-4;
-
+	protected static final double THRESHOLD = 1E-2;
 	public static int maxIteration = 1000;
-
 	public static double stdUtil = 100;
 	public static double muUtil = 100;
 	public static int numberTypes = 4;
-
-	public static int[] buyers = { 5, 10, 20, 30, 40, 50 };
-	public static int[] goods = { 5, 10, 20, 30, 40, 50 };
-
+	public static int[] buyers = { 5, 10 };
+	public static int[] goods = { 5 };
 	public static int meanRepsStart = 0;
 	public static int meanRepsEnd = 100;
 
-	public static int[] ubs = { 0, 5, 10, 25, 50, 75, 100 };
-	public static double[] p3s = { 0, 1 };
-	public static double[] p4s = { 0 };
+	public static int distribution = 1; // 1 = uniform, 2 = possion
+	public static int[] distributionParameters = { 0 };
+	// public static double[] p4s = { 0,1 };
 	public static boolean considerDecisionCounter = true;
 
 	public static int currRep;
 	public static int currBuyersNum;
 	public static int currGoodsNum;
-	public static int currUb;
-	public static double currP3;
-	public static double currP4;
+	public static int currDistributionParameter;
 
 	public static Random randomUtil;
 	public static Random randomGoodTypes;
 
-	public static Random randomUb = new Random();
-	public static Random randomP3 = new Random();
-	public static Random randomP4 = new Random();
+	public static Random randomDistributionParameter = new Random();
 
-	private static List<FisherData> allData;
-	private static List<FisherData> averageData;
+	private static List<FisherData> allData = new ArrayList<FisherData>();
+	private static List<FisherData> averageData = new ArrayList<FisherData>();
 
 	public static void main(String[] args) {
+
 		List<List<Market>> markets = createMarkets();
 		if (central) {
 			runCentralistic(markets);
 		} else {
+			setParametersForMarkets(markets);
 			runDistributed(markets);
 		}
 		createExcel();
+	}
+
+	private static void setParametersForMarkets(List<List<Market>> markets) {
+		for (List<Market> list : markets) {
+			for (Market market : list) {
+				for (int parameter : distributionParameters) {
+					market.createParameterMatrix(parameter);
+				}
+			}
+		}
 	}
 
 	private static void createExcel() {
@@ -85,17 +87,23 @@ public class MainSimulator {
 	}
 
 	private static String createHeader() {
-		String ans = "id," + "numByuers," + "numGoods," + "iteration," + "algo," + "considerDecisionCounter,"
-				+ "maxIteration," + "sumR," + "sumX," + "sumRX";
+		String ans = "id," + "numByuers," + "numGoods," + "iteration," + "algo," + "maxIteration," + "sumR," + "sumX," + "sumRX";
 
 		if (!central) {
 			ans = ans + "," + "p3" + "," + "p4" + "," + "ub";
-		}
 
 		return ans;
 	}
 
 	private static String createFileName(boolean average) {
+
+		String average1;
+		if (average) {
+			average1 = "AVERAGE,";
+		} else {
+			average1 = "FULL,";
+		}
+
 		String central1 = "central_" + central + ",";
 		String maxIteration1 = "maxIteration_" + maxIteration + ",";
 
@@ -108,7 +116,8 @@ public class MainSimulator {
 
 		String considerDecisionCounter1 = "considerDecisionCounter_" + considerDecisionCounter;
 
-		return central1 + stdUtil1 + muUtil1 + numberTypes1 + meanRepsStart1 + meanRepsEnd1 + considerDecisionCounter1;
+		return average1 + central1 + maxIteration1 + stdUtil1 + muUtil1 + numberTypes1 + meanRepsStart1 + meanRepsEnd1
+				+ considerDecisionCounter1;
 	}
 
 	private static void runCentralistic(List<List<Market>> markets) {
@@ -120,13 +129,14 @@ public class MainSimulator {
 
 				FisherSolver f = new FisherSolverCentralistic(market);
 				List<FisherData> lonlyRunData = f.algorithm();
-				max = updateMaxIteration(maxIteration, lonlyRunData.size());
+				max = updateMaxIteration(max, lonlyRunData.size());
 				toBeAverage.add(lonlyRunData);
 				allData.addAll(lonlyRunData);
+				System.out.println("done with market___" + market);
 			}
 
-			toBeAverage = fixAverage(toBeAverage, max - 1);
-			List<FisherData> average = calculateAverage(toBeAverage, max - 1);
+			toBeAverage = fixAverage(toBeAverage, max);
+			List<FisherData> average = calculateAverage(toBeAverage, max);
 			averageData.addAll(average);
 			// dataToBeAverage.add(toBeAverage);
 		}
@@ -156,10 +166,11 @@ public class MainSimulator {
 
 			fd = getFisherDataAverage(sameIterList, idF, numByuersF, numGoodsF, iterationF, algoF,
 					considerDecisionCounterF, maxIterationF);
+			ans.add(fd);
 			counter++;
 		}
 
-		return null;
+		return ans;
 	}
 
 	private static FisherData getFisherDataAverage(List<FisherData> sameIterList, int idF, int numByuersF,
@@ -211,38 +222,35 @@ public class MainSimulator {
 			if (list.size() < max) {
 				FisherData lastFisherDate = list.get(list.size() - 1);
 				FisherData copiedFisherData;
+				int iterationOfCopied = lastFisherDate.getIteration() + 1;
 				while (list.size() < max) {
+
 					if (central) {
-						copiedFisherData = new FisherDataCentralistic(lastFisherDate);
+						copiedFisherData = new FisherDataCentralistic(lastFisherDate, iterationOfCopied);
 					} else {
-						copiedFisherData = new FisherDataDistributed(lastFisherDate);
-
+						copiedFisherData = new FisherDataDistributed(lastFisherDate, iterationOfCopied);
 					}
-
+					iterationOfCopied++;
 					list.add(copiedFisherData);
 				}
 			}
 		}
 		return toBeAverage;
 	}
-
-	private static Double[][] turnUtilToR(Utility[][] rutil) {
-		Double[][] ans = new Double[rutil.length][rutil[0].length];
-
-		for (int i = 0; i < rutil.length; i++) {
-			for (int j = 0; j < rutil[i].length; j++) {
-				ans[i][j] = rutil[i][j].getUtility(1);
-			}
-		}
-		return ans;
-	}
+	/*
+	 * private static Double[][] turnUtilToR(Utility[][] rutil) { Double[][] ans =
+	 * new Double[rutil.length][rutil[0].length];
+	 * 
+	 * for (int i = 0; i < rutil.length; i++) { for (int j = 0; j < rutil[i].length;
+	 * j++) { ans[i][j] = rutil[i][j].getUtility(1); } } return ans; }
+	 */
 
 	private static void runDistributed(List<List<Market>> markets) {
-		List<Mailer> mailers = createMailers(markets);
+
+		Mailer mailer = new Mailer(distribution);
 		for (List<Market> marketReps : markets) {
-			for (Mailer mailer : mailers) {
-				runDifferentCommunicationOnMarketReps(marketReps, mailer);
-			}
+
+			runDifferentCommunicationOnMarketReps(marketReps, mailer);
 		}
 
 	}
@@ -251,17 +259,21 @@ public class MainSimulator {
 
 		List<List<FisherData>> toBeAverage = new ArrayList<List<FisherData>>();
 		int max = 0;
-		for (Market market : marketReps) {
-			market.restartMarketBetweenRuns(mailer);
-			FisherSolver f = new FisherSolverDistributed(market);
-			List<FisherData> lonlyRunData = f.algorithm();
-			max = updateMaxIteration(max, lonlyRunData.size());
-			toBeAverage.add(lonlyRunData);
-			allData.addAll(lonlyRunData);
+
+		for (int parameter : distributionParameters) {
+			for (Market market : marketReps) {
+				market.restartMarketBetweenRuns(mailer, parameter);
+				FisherSolver f = new FisherSolverDistributed(market);
+				List<FisherData> lonlyRunData = f.algorithm();
+				max = updateMaxIteration(max, lonlyRunData.size());
+				toBeAverage.add(lonlyRunData);
+				allData.addAll(lonlyRunData);
+			}
+			toBeAverage = fixAverage(toBeAverage, max);
+			List<FisherData> average = calculateAverage(toBeAverage, max);
+			averageData.addAll(average);
 		}
-		toBeAverage = fixAverage(toBeAverage, max);
-		List<FisherData> average = calculateAverage(toBeAverage, max);
-		averageData.addAll(average);
+		
 	}
 
 	private static int updateMaxIteration(int maxIteration, int currentMaxIter) {
@@ -271,22 +283,22 @@ public class MainSimulator {
 			return maxIteration;
 		}
 	}
-
-	private static List<Mailer> createMailers(List<List<Market>> markets) {
-		List<Mailer> ans = new ArrayList<Mailer>();
-		for (double selectedP3 : p3s) {
-			currP3 = selectedP3;
-			for (int selectedUB : ubs) {
-				currUb = selectedUB;
-				for (double selectedP4 : p4s) {
-					currP4 = selectedP4;
-					Mailer mailer = new Mailer(selectedP3, selectedP4, selectedUB);
-					ans.add(mailer);
-				}
-			}
-		}
-		return ans;
-	}
+	/*
+	 * private static List<Mailer> createMailers() { List<Mailer> ans = new
+	 * ArrayList<Mailer>(); for (double selectedP3 : p3s) { currP3 = selectedP3; if
+	 * (selectedP3 == 0) { currP3 = 0; for (double selectedP4 : p4s) { currP4 =
+	 * selectedP4; Mailer mailer = new Mailer(selectedP3, selectedP4, 0);
+	 * ans.add(mailer); } } else { for (double selectedP4 : p4s) { currP4 =
+	 * selectedP4;
+	 * 
+	 * if (dist) {
+	 * 
+	 * } for (int selectedParameter : ubs) { currDistributionParameter =
+	 * selectedParameter; Mailer mailer = new Mailer(selectedP3, selectedP4,
+	 * selectedParameter); ans.add(mailer); } } } }
+	 * 
+	 * return ans; }
+	 */
 
 	private static List<List<Market>> createMarkets() {
 		List<List<Market>> ans = new ArrayList<List<Market>>();

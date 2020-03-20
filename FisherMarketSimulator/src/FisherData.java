@@ -22,7 +22,6 @@ public class FisherData {
 		this.iteration =iterations;
 		Double[][] R = turnUtilToDouble(rUtil);
 		this.algo = algo;
-		considerDecisionCounter = MainSimulator.considerDecisionCounter;
 		maxIteration=MainSimulator.maxIteration;
 		this.sumR = sumMatrix(R);
 		this.sumX = sumMatrix(X);
@@ -37,7 +36,6 @@ public class FisherData {
 		this.numGoods+","+
 		this.iteration+","+
 		this.algo+","+
-		this.considerDecisionCounter+","+
 		this.maxIteration+","+
 		this.sumR+","+
 		this.sumX+","+
@@ -45,14 +43,14 @@ public class FisherData {
 		return ans;
 	}
 
-	public FisherData(FisherData copiedFisherData) {
+	public FisherData(FisherData copiedFisherData, int iterationOfCopied) {
 		
 		
 		
 		this.id=copiedFisherData.getId();
 		this.numByuers=copiedFisherData.getNumByuers();
 		this.numGoods=copiedFisherData.getNumGoods();
-		this.iteration=copiedFisherData.getIteration();
+		this.iteration=iterationOfCopied;
 		
 		this.sumR=copiedFisherData.getSumR();
 		this.sumX=copiedFisherData.getSumX();
@@ -95,17 +93,21 @@ public class FisherData {
 		Double ans = 0.0;
 		for (int i = 0; i < r.length; i++) {
 			for (int j = 0; j < r[i].length; j++) {
-				ans =ans+ r[i][j]*x[i][j];
+				if (x[i][j]!=null && r[i][j]!=null) {
+					ans =ans+ r[i][j]*x[i][j];
+				}
 			}
 		}
 		return ans;
 	}
 
 	private Double sumMatrix(Double[][] input) {
-		Double ans = null;
+		Double ans = 0.0;
 		for (int i = 0; i < input.length; i++) {
-			for (int j = 0; j < input[j].length; j++) {
-				ans+=input[i][j];
+			for (int j = 0; j < input[i].length; j++) {
+				if (input[i][j]!=null) {
+					ans+=input[i][j];
+				}
 			}
 		}
 		return ans;
@@ -175,6 +177,10 @@ public class FisherData {
 
 	public void setSumRX(Double sumRX) {
 		this.sumRX = sumRX;
+	}
+	public void increaseIterByOne() {
+		this.iteration = this.iteration+1;
+		
 	}
 
 	

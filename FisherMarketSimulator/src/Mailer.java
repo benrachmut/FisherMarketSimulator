@@ -10,29 +10,47 @@ import java.util.Vector;
 
 public class Mailer {
 	private List<Message> messageBox;
-	private double p3;
-	private double p4;
-	private int delayUb;
-	private Random rP3,rP4,delayUbR;
-
-	public Mailer( double p3, double p4, int delayUb) {
-		this.p3 = p3;
-		this.p4 = p4;
-		this.delayUb = delayUb;			
+	//private double p3;
+	//private double p4;
+	//private int delayUb;
+	private Random randomDelay;
+	private RandomNumberGenerator randomMaker;
+	private double[][] parameters;
+	public Mailer(int distributionType) {
 		this.messageBox= new ArrayList<Message>();
+		if (distributionType == 1) {
+			randomMaker = RandomNumberGenerator.Uniform;
+		}
+		if (distributionType == 2) {
+			randomMaker = RandomNumberGenerator.Poisson;
+
+		}
+	}
+	
+	public void updateParameters(double [][] input) {
+		this.parameters = input;
 	}
 	
 	
 
 	public void updateSeeds(long s) {
-		this.rP3= new Random(s+100);
-		this.rP4= new Random(s+200);
-		this.delayUbR= new Random(s+300);
+		this.randomDelay= new Random(s+100);
 	}
 	
 	
+	
 	public void createMessage(Messageable sender, int decisionCounter, Messageable reciever, double context) {
-		int delay = createDelay();
+		int buyerId, goodId;
+		if (sender instanceof Buyer) {
+			buyerId = sender.getId();
+			goodId = reciever.getId();
+		}
+		else{// (sender instanceof Good) {
+			buyerId = reciever.getId();
+			goodId = sender.getId(); 
+		}
+			
+		int delay = createDelay(buyerId,goodId);
 		Message m = new Message(sender,decisionCounter,reciever, context, delay);
 		this.messageBox.add(m);	
 	}
@@ -40,18 +58,9 @@ public class Mailer {
 	
 	
 	
-	private int createDelay() {
-		int rndDelay;
-		rndDelay = 0;	
-		double rnd = rP3.nextDouble();
-		if (rnd < this.p3) {
-			rndDelay =getRandomInt(this.delayUbR, 1, this.delayUb);
-			rnd = rP4.nextDouble();
-			if (rnd < this.p4) {
-				rndDelay = Integer.MAX_VALUE;
-			}
-		}
-		return rndDelay;
+	private int createDelay(int buyerId, int goodId) {
+		double parameter = this.parameters[buyerId][goodId];
+		return (int)this.randomMaker.getRandom(this.randomDelay, parameter);
 	}
 	
 	
@@ -86,8 +95,14 @@ public class Mailer {
 		this.updateSeeds(i);
 	}
 
+	
+
+	public void setParameterMatrix(double[][] intput) {
+		parameters = intput;	
+	}
 
 
+/*
 	public double getP3() {
 		return this.p3;
 	}
@@ -97,4 +112,5 @@ public class Mailer {
 	public int getUB() {
 		return this.delayUb;
 	}
+	*/
 }

@@ -4,7 +4,7 @@ import java.util.Map;
 import java.util.Map.Entry;
 
 
-public class Good implements Messageable {
+public class Good implements Messageable, Comparable<Good>{
 
 	private int type;
 	private int id;
@@ -149,4 +149,10 @@ public class Good implements Messageable {
 		
 	}
 	*/
+
+	@Override
+	public int compareTo(Good o) {
+		// TODO Auto-generated method stub
+		return this.id-o.getId();
+	}
 }
