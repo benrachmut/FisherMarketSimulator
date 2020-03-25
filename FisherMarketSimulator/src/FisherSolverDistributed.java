@@ -16,10 +16,14 @@ public class FisherSolverDistributed extends FisherSolver {
 		this.mailer = m.getMailer();
 		this.goods = m.getGoods();
 		this.buyers = m.getBuyers();
-		/*
-		 * for (Good g: this.goods) { g.resetGoodsBetweenRuns(); } for (Buyer b:
-		 * this.buyers) { b.resetBuyerBetweenRuns(); }
-		 */
+/*
+		for (Good g : this.goods) {
+			g.resetGoodsBetweenRuns();
+		}
+		for (Buyer b : this.buyers) {
+			b.resetBuyerBetweenRuns();
+		}
+*/
 	}
 
 	private Double[][] createCentralisticAllocation() {
@@ -53,7 +57,7 @@ public class FisherSolverDistributed extends FisherSolver {
 		List<Message> msgToSend = mailer.handleDelay();
 		Map<Messageable, List<Message>> receiversMap = createReciversMap(msgToSend);
 		sendMessages(receiversMap);
-		updateStability();
+		//updateStability();
 		this.allocation = createCentralisticAllocation();
 		FisherData ans = new FisherDataDistributed(this.allocation, this.R, this.iterations, this.market, this.mailer);
 		return ans;
@@ -63,7 +67,6 @@ public class FisherSolverDistributed extends FisherSolver {
 		this.change = 0;
 		for (Good t : goods) {
 			this.change = this.change + t.getGoodChanges();
-			;
 		}
 	}
 

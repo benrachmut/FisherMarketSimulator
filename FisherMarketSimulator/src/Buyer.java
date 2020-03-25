@@ -114,9 +114,11 @@ public class Buyer implements Messageable {
 	private void placeUtilitiesInMap() {
 	
 		for (Good task : this.utilitiesMap.keySet()) {
-			Utility u = new UtilityConcave(this, task, 1);
+			
+			Utility u = this.utilitiesMap.get(task);
+			
 			//this.utilitiesMap.put(task, u);
-			this.updatedUtilitiesMap.put(task, u.getUtility(1));
+			this.updatedUtilitiesMap.put(task,u.getUtility(1));
 		}
 	}
 
@@ -187,7 +189,12 @@ public class Buyer implements Messageable {
 		
 	}
 
-
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "b"+this.id;
+	}
+	
 	@Override
 	public int getId() {
 		// TODO Auto-generated method stub

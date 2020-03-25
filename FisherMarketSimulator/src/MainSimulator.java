@@ -16,12 +16,13 @@ public class MainSimulator {
 	public static double stdUtil = 100;
 	public static double muUtil = 100;
 	public static int numberTypes = 4;
-	public static int[] buyers = { 5, 10 };
-	public static int[] goods = { 5 };
+	public static int[] buyers = { 2 };
+	public static int[] goods = { 2 };
 	public static int meanRepsStart = 0;
 	public static int meanRepsEnd = 100;
 
-	public static int distribution = 1; // 1 = uniform, 2 = possion
+	public static int distributionParameterType = 1; // 1 = uniform, 2 = exp
+	public static int distributionDelayType = 1;// 1 = uniform, 2 = exp
 	public static int[] distributionParameters = { 0 };
 	// public static double[] p4s = { 0,1 };
 	public static boolean considerDecisionCounter = true;
@@ -29,7 +30,7 @@ public class MainSimulator {
 	public static int currRep;
 	public static int currBuyersNum;
 	public static int currGoodsNum;
-	public static int currDistributionParameter;
+	public static int currParameter;
 
 	public static Random randomUtil;
 	public static Random randomGoodTypes;
@@ -52,10 +53,20 @@ public class MainSimulator {
 	}
 
 	private static void setParametersForMarkets(List<List<Market>> markets) {
+		RandomNumberGenerator rng = null;
+		if (distributionParameterType == 1) {
+			rng = RandomNumberGenerator.Uniform;
+		}
+		
+		if (distributionParameterType == 2) {
+			rng = RandomNumberGenerator.Exponential;
+		}
+		
 		for (List<Market> list : markets) {
 			for (Market market : list) {
 				for (int parameter : distributionParameters) {
-					market.createParameterMatrix(parameter);
+					currParameter=parameter;
+					market.createParameterMatrix(parameter,rng);
 				}
 			}
 		}
@@ -90,8 +101,8 @@ public class MainSimulator {
 		String ans = "id," + "numByuers," + "numGoods," + "iteration," + "algo," + "maxIteration," + "sumR," + "sumX," + "sumRX";
 
 		if (!central) {
-			ans = ans + "," + "p3" + "," + "p4" + "," + "ub";
-
+			ans = ans + "," + "parameter" +","+"distributionDelay"+","+"distributionParameter";
+		}
 		return ans;
 	}
 
@@ -197,11 +208,16 @@ public class MainSimulator {
 		} else {
 
 			FisherDataDistributed t = (FisherDataDistributed) sameIterList.get(0);
-			double p3F = t.getP3();
-			double p4F = t.getP4();
-			int ubF = t.getUb();
+			
+			
+			
+			
+			int param = t.getParamter(); 
+			String distDelay = t.getDistributionDelay();
+			String distParam = t.getDistributionParameter();
+
 			return new FisherDataDistributed(idF, numByuersF, numGoodsF, iterationF, algoF, considerDecisionCounterF,
-					maxIterationF, avgR, avgX, avgRX, p3F, p4F, ubF);
+					maxIterationF, avgR, avgX, avgRX,distDelay,distParam,param );
 		}
 
 	}
@@ -247,9 +263,8 @@ public class MainSimulator {
 
 	private static void runDistributed(List<List<Market>> markets) {
 
-		Mailer mailer = new Mailer(distribution);
+		Mailer mailer = new Mailer(distributionDelayType);
 		for (List<Market> marketReps : markets) {
-
 			runDifferentCommunicationOnMarketReps(marketReps, mailer);
 		}
 

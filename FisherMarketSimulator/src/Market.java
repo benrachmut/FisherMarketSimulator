@@ -86,9 +86,7 @@ public class Market {
 		this.mailer.updateSeeds(this.id);
 		double[][] parameterMatrix = this.parameterDelayMartix.get(parameter);
 		this.mailer.setParameterMatrix(parameterMatrix);
-
 		this.mailer.emptyMessageBox();
-
 		for (Good g : this.goods) {
 			g.updateMailer(this.mailer);
 			g.resetGoodsBetweenRuns();
@@ -121,7 +119,7 @@ public class Market {
 		return this.mailer;
 	}
 
-	public void createParameterMatrix(int parameter) {
+	public void createParameterMatrix(int parameter, RandomNumberGenerator rng) {
 
 		double[][] value = new double[R.length][R[0].length];
 
@@ -129,11 +127,10 @@ public class Market {
 			value = setParametersToZero();
 			
 		} else {
-			RandomNumberGenerator pois = RandomNumberGenerator.Poisson;
 			Random r = new Random(id);
 			for (int i = 0; i < R.length; i++) {
 				for (int j = 0; j < R[i].length; j++) {
-					value[i][j] = pois.getRandom(r, parameter);
+					value[i][j] = rng.getRandom(r, parameter);
 				}
 			}
 		}

@@ -48,6 +48,9 @@ public class Message implements Comparable<Message> {
 		return this.decisionCounter;
 	}
 
-	
-
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return "sender:"+this.sender+", reciver:"+this.reciever+", context:"+this.context;
+	}
 }

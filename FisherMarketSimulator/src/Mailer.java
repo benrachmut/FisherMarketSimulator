@@ -22,7 +22,7 @@ public class Mailer {
 			randomMaker = RandomNumberGenerator.Uniform;
 		}
 		if (distributionType == 2) {
-			randomMaker = RandomNumberGenerator.Poisson;
+			randomMaker = RandomNumberGenerator.Exponential;
 
 		}
 	}
@@ -63,10 +63,11 @@ public class Mailer {
 		return (int)this.randomMaker.getRandom(this.randomDelay, parameter);
 	}
 	
-	
+	/*
 	private static int getRandomInt(Random r, int min, int max) {
 		return r.nextInt(max - min + 1) + min;
 	}
+	*/
 
 	public List<Message> handleDelay() {
 		Collections.sort(this.messageBox);
@@ -99,6 +100,21 @@ public class Mailer {
 
 	public void setParameterMatrix(double[][] intput) {
 		parameters = intput;	
+	}
+
+	public int getParameter() {
+		// TODO Auto-generated method stub
+		return MainSimulator.currParameter;
+	}
+
+	public int getDistributionDelay() {
+		// TODO Auto-generated method stub
+		return MainSimulator.distributionDelayType;
+	}
+	
+	public int getDistributionParameter() {
+		// TODO Auto-generated method stub
+		return MainSimulator.distributionParameterType;
 	}
 
 

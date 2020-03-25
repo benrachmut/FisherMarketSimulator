@@ -23,6 +23,9 @@ public abstract class FisherSolver {
 		data.add(iterate());
 		while (!isStable()) {
 			this.iterations = this.iterations + 1;
+			if (this.iterations==3) {
+				System.out.println(3);
+			}
 			data.add(iterate());
 		}
 

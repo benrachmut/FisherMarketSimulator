@@ -9,6 +9,11 @@ public class UtilityConcave extends UtilityLinear {
 		this.ro=ro;
 		
 	}
+	public UtilityConcave(double linearUtility,Buyer buyer, Good good,double ro){
+		super(buyer, good,linearUtility);
+		this.ro=ro;
+	}
+	
 	public UtilityConcave(double linearUtility,double ro){
 		super(linearUtility);
 		this.ro=ro;
