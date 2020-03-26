@@ -175,4 +175,9 @@ public class Good implements Messageable, Comparable<Good> {
 		// TODO Auto-generated method stub
 		return this.id - o.getId();
 	}
+
+	public double getPrice() {
+		// TODO Auto-generated method stub
+		return this.calculatePrice();
+	}
 }

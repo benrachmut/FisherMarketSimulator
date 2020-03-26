@@ -19,7 +19,7 @@ public class MainSimulator {
 	public static int[] buyers = { 2 };
 	public static int[] goods = { 2 };
 	public static int meanRepsStart = 0;
-	public static int meanRepsEnd = 100;
+	public static int meanRepsEnd = 1;
 
 	public static int distributionParameterType = 1; // 1 = uniform, 2 = exp
 	public static int distributionDelayType = 1;// 1 = uniform, 2 = exp
@@ -279,6 +279,7 @@ public class MainSimulator {
 			for (Market market : marketReps) {
 				market.restartMarketBetweenRuns(mailer, parameter);
 				FisherSolver f = new FisherSolverDistributed(market);
+
 				List<FisherData> lonlyRunData = f.algorithm();
 				max = updateMaxIteration(max, lonlyRunData.size());
 				toBeAverage.add(lonlyRunData);

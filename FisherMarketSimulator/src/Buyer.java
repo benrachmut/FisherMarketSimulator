@@ -8,7 +8,7 @@ import java.util.Vector;
 import java.util.Map.Entry;
 
 
-public class Buyer implements Messageable {
+public class Buyer implements Messageable , Comparable<Buyer> {
 
 	private int id;
 	private SortedMap <Good,Utility> utilitiesMap;
@@ -24,13 +24,11 @@ public class Buyer implements Messageable {
 	public Buyer(int i, List<Good> goods, Random r) {
 		this.id=i;
 		this.randomUtil = r;
-		
 		this.utilitiesMap = createUtils(goods);
 	}
 
 
 	public SortedMap<Good, Utility> createUtils(List<Good> goods) {
-		
 		SortedMap<Good, Utility> ans = new TreeMap<Good, Utility>();
 		for (int j = 0; j < goods.size(); j++) {
 			Good g = goods.get(j);	
@@ -202,7 +200,37 @@ public class Buyer implements Messageable {
 	}
 	
 
-	
+	@Override
+	public int compareTo(Buyer o) {
+		// TODO Auto-generated method stub
+		return this.id - o.getId();
+	}
+
+
+	public Map<Good,Double> getBids() {
+		// TODO Auto-generated method stub
+		return this.bidsMap;
+	}
+
+
+	public Map<Good, Double> getCurrentUtil() {
+		// TODO Auto-generated method stub
+		return this.updatedUtilitiesMap;
+	}
+
+/*
+	public Map<Good, Double> getAllocation() {
+		Map<Good, Double> ans = new HashMap<Good, Double>();
+		for (Entry<Good, Message> e : this.messageRecived.entrySet()) {
+			ans.put(e.getKey(), e.getValue().value);
+		}
+		
+		messageRecived;
+
+
+		return ;
+	}
+	*/
 
 	
 	
