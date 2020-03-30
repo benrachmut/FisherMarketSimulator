@@ -16,7 +16,7 @@ public class MainSimulator {
 	public static double stdUtil = 100;
 	public static double muUtil = 100;
 	public static int numberTypes = 4;
-	public static int[] buyers = { 2 ,4};
+	public static int[] buyers = {2};
 	public static int[] goods = { 2 };
 	public static int meanRepsStart = 0;
 	public static int meanRepsEnd = 2;
