@@ -4,17 +4,15 @@ public class FisherData {
 	protected int id;
 	protected int numByuers;
 	protected int numGoods;
-	protected int iteration;
-	
-	protected Double sumR;
-	protected Double sumX;
+	protected double iteration;
 	protected Double sumRX;
+	protected double envyFree;
 	protected String algo;
 	protected boolean considerDecisionCounter;
 	protected int maxIteration;
 	
 
-	public FisherData(Double[][] X, Utility[][] rUtil, int iterations, Market market,String algo) {
+	public FisherData(Double[][] X, Utility[][] rUtil, double iterations, Market market,String algo) {
 		
 		this.id = market.getId();
 		this.numByuers = market.getBuyers().size();
@@ -23,11 +21,49 @@ public class FisherData {
 		Double[][] R = turnUtilToDouble(rUtil);
 		this.algo = algo;
 		maxIteration=MainSimulator.maxIteration;
-		this.sumR = sumMatrix(R);
-		this.sumX = sumMatrix(X);
+		//this.sumR = sumMatrix(R);
+		//this.sumX = sumMatrix(X);
 		this.sumRX = createRX(R,X);
+		this.envyFree = checkEnvyFree(X,rUtil);
 		
 	}
+	
+	
+	private static int checkEnvyFree(Double[][] x, Utility[][] r) {
+		
+		for (int a = 0; a < r.length; a++) {
+			double [] calcUtility = new double[r.length];
+		
+			for (int aWantSwitch = 0; aWantSwitch < x.length; aWantSwitch++) {
+				double u = 0;
+				for (int good = 0; good < x[aWantSwitch].length; good++) {
+						if(x[aWantSwitch][good]!=null){
+							u = u + r[a][good].getUtility(x[aWantSwitch][good]);
+						}
+				}// good
+				calcUtility[aWantSwitch] = u;
+			} // aWantSwitch
+			
+			if (!checkEnvyFreeOfAgent(calcUtility,a)) {
+				return 0;
+			}
+		}// aIsEnvy
+		return 1;
+	}
+	private static boolean checkEnvyFreeOfAgent(double[] util, int aIsEnvy) {
+		double aUtility = util[aIsEnvy];
+		for (int aOther = 0; aOther < util.length; aOther++) {
+			if (aOther != aIsEnvy) {
+				double aOtherUtility =  util[aOther];
+				if (aUtility<aOtherUtility) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+
+
 	@Override
 	public String toString() {
 		String ans= 
@@ -37,13 +73,14 @@ public class FisherData {
 		this.iteration+","+
 		this.algo+","+
 		this.maxIteration+","+
-		this.sumR+","+
-		this.sumX+","+
-		this.sumRX;
+		//this.sumR+","+
+		//this.sumX+","+
+		this.sumRX+","+
+		this.envyFree;
 		return ans;
 	}
 
-	public FisherData(FisherData copiedFisherData, int iterationOfCopied) {
+	public FisherData(FisherData copiedFisherData, double iterationOfCopied) {
 		
 		
 		
@@ -52,26 +89,27 @@ public class FisherData {
 		this.numGoods=copiedFisherData.getNumGoods();
 		this.iteration=iterationOfCopied;
 		
-		this.sumR=copiedFisherData.getSumR();
-		this.sumX=copiedFisherData.getSumX();
+		//this.sumR=copiedFisherData.getSumR();
+		//this.sumX=copiedFisherData.getSumX();
 		this.sumRX=copiedFisherData.getSumRX();
 		this.algo=copiedFisherData.getAlgo();
 		this.considerDecisionCounter=copiedFisherData.getConsiderDecisionCounter();
 		this.maxIteration=copiedFisherData.getMaxIteration();
 	}
 
-	public FisherData(int idF, int numByuersF, int numGoodsF, int iterationF, String algoF,
-			boolean considerDecisionCounterF, int maxIterationF, double avgR, double avgX, double avgRX) {
+	public FisherData(int idF, int numByuersF, int numGoodsF, double iterationF, String algoF,
+			boolean considerDecisionCounterF, int maxIterationF, double avgRX, double envyFreeF) {
 		this.id=idF;
 		this.numByuers=numByuersF;
 		this.numGoods=numGoodsF;
 		this.iteration=iterationF;
-		this.sumR=avgR;
-		this.sumX=avgX;
+		//this.sumR=avgR;
+		//this.sumX=avgX;
 		this.sumRX=avgRX;
 		this.algo=algoF;
 		this.considerDecisionCounter=considerDecisionCounterF;
 		this.maxIteration=maxIterationF;
+		this.envyFree = envyFreeF;
 	}
 
 	public int getMaxIteration() {
@@ -100,7 +138,7 @@ public class FisherData {
 		}
 		return ans;
 	}
-
+/*
 	private Double sumMatrix(Double[][] input) {
 		Double ans = 0.0;
 		for (int i = 0; i < input.length; i++) {
@@ -112,7 +150,9 @@ public class FisherData {
 		}
 		return ans;
 	}
+	*/
 
+	
 	private Double[][] turnUtilToDouble(Utility[][] rUtil) {
 		Double[][] ans = new Double[rUtil.length][rUtil[0].length];
 		for (int i = 0; i < ans.length; i++) {
@@ -122,6 +162,7 @@ public class FisherData {
 		}
 		return ans;
 	}
+	
 
 	public int getId() {
 		return id;
@@ -147,14 +188,14 @@ public class FisherData {
 		this.numGoods = numGoods;
 	}
 
-	public int getIteration() {
+	public double getIteration() {
 		return iteration;
 	}
 
 	public void setIteration(int iteration) {
 		this.iteration = iteration;
 	}
-
+/*
 	public Double getSumR() {
 		return sumR;
 	}
@@ -170,6 +211,7 @@ public class FisherData {
 	public void setSumX(Double sumX) {
 		this.sumX = sumX;
 	}
+	*/
 
 	public Double getSumRX() {
 		return sumRX;
@@ -181,6 +223,10 @@ public class FisherData {
 	public void increaseIterByOne() {
 		this.iteration = this.iteration+1;
 		
+	}
+	public Double getEnvyFree() {
+		// TODO Auto-generated method stub
+		return this.envyFree;
 	}
 
 	

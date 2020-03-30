@@ -6,14 +6,16 @@ public class FisherDataCentralistic extends FisherData {
 		
 	}
 
-	public FisherDataCentralistic(FisherData copiedFisherData, int iterationOfCopied) {
+	public FisherDataCentralistic(FisherData copiedFisherData, double iterationOfCopied) {
 		super(copiedFisherData,iterationOfCopied);
 	}
 
-	public FisherDataCentralistic(int idF, int numByuersF, int numGoodsF, int iterationF, String algoF,
-			boolean considerDecisionCounterF, int maxIterationF, double avgR, double avgX, double avgRX) {
+	public FisherDataCentralistic(int idF, int numByuersF, int numGoodsF, double iterationF, String algoF,
+			boolean considerDecisionCounterF, int maxIterationF,  double avgRX, double envyFree) {
+		
+		
 		super( idF,  numByuersF,  numGoodsF,  iterationF,  algoF,
-				 considerDecisionCounterF,  maxIterationF,  avgR,  avgX,  avgRX);
+				 considerDecisionCounterF,  maxIterationF,   avgRX, envyFree);
 	}
 
 }

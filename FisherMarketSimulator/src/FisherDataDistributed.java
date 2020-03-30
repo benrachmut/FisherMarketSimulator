@@ -36,7 +36,7 @@ public class FisherDataDistributed extends FisherData {
 		
 	}
 
-	public FisherDataDistributed(FisherData copiedFisherData, int iterationOfCopied) {
+	public FisherDataDistributed(FisherData copiedFisherData, double iterationOfCopied) {
 		super(copiedFisherData, iterationOfCopied);
 		
 		if (copiedFisherData instanceof FisherDataDistributed) {
@@ -60,11 +60,11 @@ public class FisherDataDistributed extends FisherData {
 		return this.distributionDelay;
 	}
 
-	public FisherDataDistributed(int idF, int numByuersF, int numGoodsF, int iterationF, String algoF,
-			boolean considerDecisionCounterF, int maxIterationF, double avgR, double avgX, double avgRX,
+	public FisherDataDistributed(int idF, int numByuersF, int numGoodsF, double iterationF, String algoF,
+			boolean considerDecisionCounterF, int maxIterationF,  double avgRX, double envyFree, 
 			String distributionDelay,String distributionParameter, int parameterF) {
 		super( idF,  numByuersF,  numGoodsF,  iterationF,  algoF,
-				 considerDecisionCounterF,  maxIterationF,  avgR,  avgX,  avgRX);
+				 considerDecisionCounterF,  maxIterationF, avgRX, envyFree);
 		considerDecisionCounter = MainSimulator.considerDecisionCounter;
 		this.distributionDelay= distributionDelay;
 		this.distributionParameter=distributionParameter;

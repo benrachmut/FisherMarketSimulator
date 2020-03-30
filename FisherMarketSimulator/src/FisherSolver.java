@@ -116,26 +116,5 @@ public abstract class FisherSolver {
 		return isStable || isComplete;
 	}
 	
-	private static void printEF(Double[][] output, Utility[][] input3) {
-		for (int k = 0; k < input3.length; k++) {
-			for (int i = 0; i < output.length; i++) {
-				double u = 0;
-				for (int j = 0; j < output[i].length; j++) {
-						if(output[i][j]!=null){
-							u = u + input3[k][j].getUtility(output[i][j]);
-						}
-				}
-				//u= Math.pow(u,1.0/pow);
-				if (i == k) {
-					System.out.println("my utility " + u);
-				} else {
-					System.out.println("others utility " + u);
-				}
-			}
-			System.out.println("");
-			System.out.println("");
-
-		}
-
-	}
+	
 }

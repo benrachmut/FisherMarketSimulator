@@ -10,16 +10,16 @@ public class MainSimulator {
 	// ------- VARIABLES TO CHECK BEFORE STARTING A RUN
 	// -- variables of dcop problem
 
-	public static boolean central = false;
+	public static boolean central = true;
 	protected static final double THRESHOLD = 1E-2;
 	public static int maxIteration = 1000;
 	public static double stdUtil = 100;
 	public static double muUtil = 100;
 	public static int numberTypes = 4;
-	public static int[] buyers = { 2 };
+	public static int[] buyers = { 2 ,4};
 	public static int[] goods = { 2 };
 	public static int meanRepsStart = 0;
-	public static int meanRepsEnd = 1;
+	public static int meanRepsEnd = 2;
 
 	public static int distributionParameterType = 1; // 1 = uniform, 2 = exp
 	public static int distributionDelayType = 1;// 1 = uniform, 2 = exp
@@ -40,6 +40,9 @@ public class MainSimulator {
 	private static List<FisherData> allData = new ArrayList<FisherData>();
 	private static List<FisherData> averageData = new ArrayList<FisherData>();
 
+	private static List<FisherData> allDataLast = new ArrayList<FisherData>();
+	private static List<FisherData> averageDataLast = new ArrayList<FisherData>();
+
 	public static void main(String[] args) {
 
 		List<List<Market>> markets = createMarkets();
@@ -57,29 +60,45 @@ public class MainSimulator {
 		if (distributionParameterType == 1) {
 			rng = RandomNumberGenerator.Uniform;
 		}
-		
+
 		if (distributionParameterType == 2) {
 			rng = RandomNumberGenerator.Exponential;
 		}
-		
+
 		for (List<Market> list : markets) {
 			for (Market market : list) {
 				for (int parameter : distributionParameters) {
-					currParameter=parameter;
-					market.createParameterMatrix(parameter,rng);
+					currParameter = parameter;
+					market.createParameterMatrix(parameter, rng);
 				}
 			}
 		}
 	}
 
 	private static void createExcel() {
-		createFile(averageData, true);
-		createFile(allData, false);
+		
+		for (int i = 1; i <= 4; i++) {
+			
+			if (i==1) {
+				createFile(averageData, i);
+			}
+			if (i==2) {
+				createFile(allData, i);
+			}
+			if (i==3) {
+				createFile(averageDataLast, i);
+			}
+			if (i==4) {
+				createFile(allDataLast, i);
+			}
+			
+		}
+		
 	}
 
-	private static void createFile(List<FisherData> data, boolean average) {
+	private static void createFile(List<FisherData> data, int input) {
 		try {
-			String fileName = createFileName(average);
+			String fileName = createFileName(input);
 			FileWriter s = new FileWriter(fileName + ".csv");
 			BufferedWriter out = new BufferedWriter(s);
 			String h = createHeader();
@@ -98,37 +117,39 @@ public class MainSimulator {
 	}
 
 	private static String createHeader() {
-		String ans = "id," + "numByuers," + "numGoods," + "iteration," + "algo," + "maxIteration," + "sumR," + "sumX," + "sumRX";
+		
+		String ans = "id," + "numByuers," + "numGoods," + "iteration," + 
+		"algo," + "maxIteration," + "sumRX,"+ "envyFree";
+		
 
 		if (!central) {
-			ans = ans + "," + "parameter" +","+"distributionDelay"+","+"distributionParameter";
+			ans = ans + "," + "parameter" + "," + "distributionDelay" + "," + "distributionParameter";
 		}
 		return ans;
 	}
 
-	private static String createFileName(boolean average) {
+	private static String createFileName(int input) {
 
-		String average1;
-		if (average) {
-			average1 = "AVERAGE,";
-		} else {
-			average1 = "FULL,";
+		String typeFile = null;
+		if (input==1) {
+			typeFile = "averageAll";
+		} 
+		if(input==2){
+			typeFile = "fullAll";
 		}
-
+		if(input==3){
+			typeFile = "averageLast";
+		}
+		if(input==4){
+			typeFile = "fullLast";
+		}
+		
+		typeFile = "typeFile_"+typeFile+",";
 		String central1 = "central_" + central + ",";
-		String maxIteration1 = "maxIteration_" + maxIteration + ",";
-
-		String stdUtil1 = "stdUtil_" + stdUtil + ",";
-		String muUtil1 = "muUtil_" + muUtil + ",";
-		String numberTypes1 = "numberTypes_" + numberTypes + ",";
-
-		String meanRepsStart1 = "meanRepsStart_" + meanRepsStart + ",";
-		String meanRepsEnd1 = "meanRepsEnd_" + meanRepsEnd + ",";
-
-		String considerDecisionCounter1 = "considerDecisionCounter_" + considerDecisionCounter;
-
-		return average1 + central1 + maxIteration1 + stdUtil1 + muUtil1 + numberTypes1 + meanRepsStart1 + meanRepsEnd1
-				+ considerDecisionCounter1;
+		String meanRepsStart1 = "start_" + meanRepsStart + ",";
+		String meanRepsEnd1 = "end_" + meanRepsEnd ;
+		
+		return typeFile + central1 + meanRepsStart1 + meanRepsEnd1;
 	}
 
 	private static void runCentralistic(List<List<Market>> markets) {
@@ -139,19 +160,94 @@ public class MainSimulator {
 			for (Market market : list) {
 
 				FisherSolver f = new FisherSolverCentralistic(market);
-				List<FisherData> lonlyRunData = f.algorithm();
-				max = updateMaxIteration(max, lonlyRunData.size());
-				toBeAverage.add(lonlyRunData);
-				allData.addAll(lonlyRunData);
-				System.out.println("done with market___" + market);
+				List<FisherData> lonelyRunData = f.algorithm();
+				max = updateMaxIteration(max, lonelyRunData.size());
+				toBeAverage.add(lonelyRunData);
+				allData.addAll(lonelyRunData);
+				allDataLast.add(lonelyRunData.get(lonelyRunData.size() - 1));
+				System.out.println(market);
 			}
+
+			List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
+			averageDataLast.add(calculateAverageLast(lastToBeAverage));
 
 			toBeAverage = fixAverage(toBeAverage, max);
 			List<FisherData> average = calculateAverage(toBeAverage, max);
 			averageData.addAll(average);
+
+			// averageDataLast;
+
 			// dataToBeAverage.add(toBeAverage);
 		}
 
+	}
+
+	private static FisherData calculateAverageLast(List<FisherData> lastToBeAverage) {
+
+		FisherData f = lastToBeAverage.get(0);
+		int numByuersF = f.getNumByuers();
+		int numGoodsF = f.getNumGoods();
+		double iterationF = calculateAvgIterations(lastToBeAverage);
+		String algoF = f.getAlgo();
+		boolean considerDecisionCounterF = f.getConsiderDecisionCounter();
+		int maxIterationF = f.getMaxIteration();
+		double avgRX = calculateAvgRX(lastToBeAverage);
+		double envyFreeF = calculateAvgEnvyFree(lastToBeAverage);
+		FisherData ans = null;
+		if (!central) {
+			String distributionDelay = ((FisherDataDistributed) f).getDistributionDelay();
+			String distributionParameter = ((FisherDataDistributed) f).getDistributionParameter();
+			int parameterF = ((FisherDataDistributed) f).getParamter();
+			ans = new FisherDataDistributed(-1, numByuersF, numGoodsF, iterationF, algoF, considerDecisionCounterF,
+					maxIterationF, avgRX, envyFreeF, distributionDelay, distributionParameter, parameterF);
+		} else {
+			ans = new FisherDataCentralistic(-1, numByuersF, numGoodsF, iterationF, algoF, considerDecisionCounterF,
+					maxIterationF, avgRX, envyFreeF);
+
+		}
+
+		return ans;
+	}
+
+	private static double calculateAvgEnvyFree(List<FisherData> lastToBeAverage) {
+		List<Double> ans = new ArrayList<Double>();
+		for (FisherData f : lastToBeAverage) {
+			ans.add(f.getEnvyFree());
+		}
+		return calcAverage(ans);
+	}
+
+	private static double calculateAvgRX(List<FisherData> lastToBeAverage) {
+		List<Double> ans = new ArrayList<Double>();
+		for (FisherData f : lastToBeAverage) {
+			ans.add(f.getSumRX());
+		}
+		return calcAverage(ans);
+	}
+
+	private static double calculateAvgIterations(List<FisherData> lastToBeAverage) {
+		List<Double> ans = new ArrayList<Double>();
+		for (FisherData f : lastToBeAverage) {
+			ans.add(f.getIteration());
+		}
+		return calcAverage(ans);
+	}
+
+	private static double calcAverage(List<Double> vector) {
+		double sum = 0.0;
+		for (Double d : vector) {
+			sum += d;
+		}
+		return sum / vector.size();
+	}
+
+	private static List<FisherData> getLastFromToBeAverage(List<List<FisherData>> toBeAverage) {
+		List<FisherData> ans = new ArrayList<FisherData>();
+		for (List<FisherData> list : toBeAverage) {
+			FisherData last = list.get(list.size() - 1);
+			ans.add(last);
+		}
+		return ans;
 	}
 
 	private static List<FisherData> calculateAverage(List<List<FisherData>> toBeAverage, int max) {
@@ -159,7 +255,9 @@ public class MainSimulator {
 		checkIfToBeAverageIsValid(toBeAverage, max);
 		int counter = 0;
 		FisherData fd;
+
 		while (counter != max) {
+
 			List<FisherData> sameIterList = new ArrayList<FisherData>();
 
 			for (List<FisherData> list : toBeAverage) {
@@ -170,58 +268,56 @@ public class MainSimulator {
 			int idF = -1;
 			int numByuersF = t.getNumByuers();
 			int numGoodsF = t.getNumGoods();
-			int iterationF = t.getIteration();
+			double iterationF = t.getIteration();
 			String algoF = t.getAlgo();
 			boolean considerDecisionCounterF = t.getConsiderDecisionCounter();
 			int maxIterationF = t.getMaxIteration();
+			double rxF = calculateAvgRX(sameIterList);
+			double envyFreeF = calculateAvgEnvyFree(sameIterList);
+			if (!central) {
+				int param = ((FisherDataDistributed) t).getParamter();
+				String distDelay = ((FisherDataDistributed) t).getDistributionDelay();
+				String distParam = ((FisherDataDistributed) t).getDistributionParameter();
+				ans.add(new FisherDataDistributed(idF, numByuersF, numGoodsF, iterationF, algoF,
+						considerDecisionCounterF, maxIterationF, rxF, envyFreeF, distDelay, distParam, param));
+			} else {
+				ans.add(new FisherDataCentralistic(idF, numByuersF, numGoodsF, iterationF, algoF,
+						considerDecisionCounterF, maxIterationF, rxF, envyFreeF));
+			}
 
-			fd = getFisherDataAverage(sameIterList, idF, numByuersF, numGoodsF, iterationF, algoF,
-					considerDecisionCounterF, maxIterationF);
-			ans.add(fd);
 			counter++;
 		}
 
 		return ans;
 	}
 
-	private static FisherData getFisherDataAverage(List<FisherData> sameIterList, int idF, int numByuersF,
-			int numGoodsF, int iterationF, String algoF, boolean considerDecisionCounterF, int maxIterationF) {
-
-		double sumRX = 0.0;
-		double sumR = 0.0;
-		double sumX = 0.0;
-
-		double n = sameIterList.size();
-		for (FisherData fisherData : sameIterList) {
-			sumRX += fisherData.getSumRX();
-			sumX += fisherData.getSumX();
-			sumR += fisherData.getSumR();
-		}
-
-		double avgR = sumR / sameIterList.size();
-		double avgX = sumX / sameIterList.size();
-		double avgRX = sumRX / sameIterList.size();
-
-		if (central) {
-			return new FisherDataCentralistic(idF, numByuersF, numGoodsF, iterationF, algoF, considerDecisionCounterF,
-					maxIterationF, avgR, avgX, avgRX);
-		} else {
-
-			FisherDataDistributed t = (FisherDataDistributed) sameIterList.get(0);
-			
-			
-			
-			
-			int param = t.getParamter(); 
-			String distDelay = t.getDistributionDelay();
-			String distParam = t.getDistributionParameter();
-
-			return new FisherDataDistributed(idF, numByuersF, numGoodsF, iterationF, algoF, considerDecisionCounterF,
-					maxIterationF, avgR, avgX, avgRX,distDelay,distParam,param );
-		}
-
-	}
-
+	/*
+	 * private static FisherData getFisherDataAverage(List<FisherData> sameIterList,
+	 * int idF, int numByuersF, int numGoodsF, int iterationF, String algoF, boolean
+	 * considerDecisionCounterF, int maxIterationF) {
+	 * 
+	 * double sumRX = 0.0; double sumR = 0.0; double sumX = 0.0;
+	 * 
+	 * double n = sameIterList.size(); for (FisherData fisherData : sameIterList) {
+	 * sumRX += fisherData.getSumRX(); }
+	 * 
+	 * double avgR = sumR / sameIterList.size(); double avgX = sumX /
+	 * sameIterList.size(); double avgRX = sumRX / sameIterList.size();
+	 * 
+	 * if (central) { return new FisherDataCentralistic(idF, numByuersF, numGoodsF,
+	 * iterationF, algoF, considerDecisionCounterF, maxIterationF, avgR, avgX,
+	 * avgRX); } else {
+	 * 
+	 * FisherDataDistributed t = (FisherDataDistributed) sameIterList.get(0); int
+	 * param = t.getParamter(); String distDelay = t.getDistributionDelay(); String
+	 * distParam = t.getDistributionParameter();
+	 * 
+	 * return new FisherDataDistributed(idF, numByuersF, numGoodsF, iterationF,
+	 * algoF, considerDecisionCounterF, maxIterationF, avgR, avgX, avgRX, distDelay,
+	 * distParam, param); }
+	 * 
+	 * }
+	 */
 	private static void checkIfToBeAverageIsValid(List<List<FisherData>> toBeAverage, int max) {
 		for (List<FisherData> list : toBeAverage) {
 			int sizeOfList = list.size();
@@ -238,7 +334,7 @@ public class MainSimulator {
 			if (list.size() < max) {
 				FisherData lastFisherDate = list.get(list.size() - 1);
 				FisherData copiedFisherData;
-				int iterationOfCopied = lastFisherDate.getIteration() + 1;
+				double iterationOfCopied = lastFisherDate.getIteration() + 1;
 				while (list.size() < max) {
 
 					if (central) {
@@ -289,7 +385,7 @@ public class MainSimulator {
 			List<FisherData> average = calculateAverage(toBeAverage, max);
 			averageData.addAll(average);
 		}
-		
+
 	}
 
 	private static int updateMaxIteration(int maxIteration, int currentMaxIter) {
