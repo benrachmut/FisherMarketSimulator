@@ -25,7 +25,6 @@ public class FisherData {
 		//this.sumX = sumMatrix(X);
 		this.sumRX = createRX(R,X);
 		this.envyFree = checkEnvyFree(X,rUtil);
-		
 	}
 	
 	
@@ -38,7 +37,8 @@ public class FisherData {
 				double u = 0;
 				for (int good = 0; good < x[aWantSwitch].length; good++) {
 						if(x[aWantSwitch][good]!=null){
-							u = u + r[a][good].getUtility(x[aWantSwitch][good]);
+							double calc = r[a][good].getUtility(x[aWantSwitch][good]);
+							u = u + calc;
 						}
 				}// good
 				calcUtility[aWantSwitch] = u;
@@ -95,6 +95,7 @@ public class FisherData {
 		this.algo=copiedFisherData.getAlgo();
 		this.considerDecisionCounter=copiedFisherData.getConsiderDecisionCounter();
 		this.maxIteration=copiedFisherData.getMaxIteration();
+		this.envyFree = copiedFisherData.getEnvyFree();
 	}
 
 	public FisherData(int idF, int numByuersF, int numGoodsF, double iterationF, String algoF,
@@ -127,7 +128,7 @@ public class FisherData {
 		return new String(this.algo);
 	}
 
-	private Double createRX(Double[][] r, Double[][] x) {
+	public static Double createRX(Double[][] r, Double[][] x) {
 		Double ans = 0.0;
 		for (int i = 0; i < r.length; i++) {
 			for (int j = 0; j < r[i].length; j++) {

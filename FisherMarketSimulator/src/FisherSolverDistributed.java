@@ -17,14 +17,10 @@ public class FisherSolverDistributed extends FisherSolver {
 		this.mailer = m.getMailer();
 		this.goods = m.getGoods();
 		this.buyers = m.getBuyers();
-/*
-		for (Good g : this.goods) {
-			g.resetGoodsBetweenRuns();
-		}
-		for (Buyer b : this.buyers) {
-			b.resetBuyerBetweenRuns();
-		}
-*/
+		/*
+		 * for (Good g : this.goods) { g.resetGoodsBetweenRuns(); } for (Buyer b :
+		 * this.buyers) { b.resetBuyerBetweenRuns(); }
+		 */
 	}
 
 	private Double[][] createCentralisticAllocation() {
@@ -58,10 +54,19 @@ public class FisherSolverDistributed extends FisherSolver {
 		List<Message> msgToSend = mailer.handleDelay();
 		Map<Messageable, List<Message>> receiversMap = createReciversMap(msgToSend);
 		sendMessages(receiversMap);
-		//updateStability();
 		this.allocation = createCentralisticAllocation();
+		updateChange();
 		FisherData ans = new FisherDataDistributed(this.allocation, this.R, this.iterations, this.market, this.mailer);
 		return ans;
+	}
+
+	private void updateChange() {
+		double ans = 0.0;
+		for (Good g : this.goods) {
+			ans+=g.getGoodChanges();
+		}
+		this.change = ans;
+
 	}
 
 	private void updateStability() {
@@ -116,50 +121,49 @@ public class FisherSolverDistributed extends FisherSolver {
 
 	@Override
 	protected double[][] getBids() {
-		double[][]ans = new double[this.buyers.size()][this.goods.size()];
+		double[][] ans = new double[this.buyers.size()][this.goods.size()];
 		Collections.sort(this.buyers);
 		for (int i = 0; i < buyers.size(); i++) {
 			Map<Good, Double> bidsI = buyers.get(i).getBids();
 			for (Entry<Good, Double> e : bidsI.entrySet()) {
 				Good g = e.getKey();
 				int id = g.getId();
-				ans[i][id]=e.getValue();
+				ans[i][id] = e.getValue();
 			}
-			
+
 		}
 		return ans;
 	}
 
 	@Override
 	protected double[][] getCurrentUtil() {
-		double[][]ans = new double[this.buyers.size()][this.goods.size()];
+		double[][] ans = new double[this.buyers.size()][this.goods.size()];
 		Collections.sort(this.buyers);
 		for (int i = 0; i < buyers.size(); i++) {
 			Map<Good, Double> utilI = buyers.get(i).getCurrentUtil();
 			for (Entry<Good, Double> e : utilI.entrySet()) {
 				Good g = e.getKey();
 				int id = g.getId();
-				ans[i][id]=e.getValue();
+				ans[i][id] = e.getValue();
 			}
-			
+
 		}
 		return ans;
 	}
 
 	@Override
 	protected double[][] getAllocation() {
-		double[][]ans = new double[this.buyers.size()][this.goods.size()];
+		double[][] ans = new double[this.buyers.size()][this.goods.size()];
 		Collections.sort(this.goods);
 		for (int j = 0; j < goods.size(); j++) {
 			Map<Buyer, Double> bidsJ = goods.get(j).getAllocation();
-			
-			
+
 			for (Entry<Buyer, Double> e : bidsJ.entrySet()) {
 				Buyer g = e.getKey();
 				int id = g.getId();
-				ans[id][j]=e.getValue();
+				ans[id][j] = e.getValue();
 			}
-			
+
 		}
 		return ans;
 	}
@@ -169,7 +173,7 @@ public class FisherSolverDistributed extends FisherSolver {
 		Collections.sort(this.goods);
 		double[] ans = new double[this.goods.size()];
 		for (int i = 0; i < ans.length; i++) {
-			ans[i]=this.goods.get(i).getPrice();
+			ans[i] = this.goods.get(i).getPrice();
 		}
 		return ans;
 	}

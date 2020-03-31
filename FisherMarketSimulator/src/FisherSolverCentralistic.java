@@ -8,16 +8,15 @@ public class FisherSolverCentralistic extends FisherSolver {
 
 	protected int nofAgents;
 	protected int nofGoods;
-
+	protected double[][] utilites;
 	public FisherSolverCentralistic(Market market) {
 		super(market);
 		this.nofAgents = R.length;
 		this.nofGoods = R[0].length;
 
 		initializeFields(this.R);
-		initializeValuations(this.R);
-		initializeBids(this.R);
-		// ((ConcaveUtility)utilities[i][j]).getLinearUtility();
+		double[] valuationSums = initializeValuations(this.R);
+		initializeBids(this.R,valuationSums);
 		updatePriceVectorUsingBids();
 		updateCurrentAllocationMatrixAndChanges();
 		
@@ -38,20 +37,22 @@ public class FisherSolverCentralistic extends FisherSolver {
 	// -----------METHODS OF iterate------
 
 	private void updateBidsUsingUtilites() {
-		double[][] utilities = new double[nofAgents][nofGoods];
+		double[][] utilitiesHere = new double[nofAgents][nofGoods];
 		// calculate current utilities and sum the utility for each agent
 		final double[] utilitySum = new double[nofAgents];
 		for (int i = 0; i < nofAgents; i++) {
 			for (int j = 0; j < nofGoods; j++) {
 				if (currentAllocation[i][j] != null) {
-					utilities[i][j] = valuations[i][j].getUtility(currentAllocation[i][j]);
+					utilitiesHere[i][j] = valuations[i][j].getUtility(currentAllocation[i][j]);
 					utilitySum[i] += valuations[i][j].getUtility(currentAllocation[i][j]);
 				}
 			}
 		}
+		
+		this.utilites = utilitiesHere;
 		for (int i = 0; i < nofAgents; i++) {
 			for (int j = 0; j < nofGoods; j++) {
-				bids[i][j] = utilities[i][j] / utilitySum[i];
+				bids[i][j] = utilitiesHere[i][j] / utilitySum[i];
 			}
 		}
 
@@ -138,7 +139,18 @@ public class FisherSolverCentralistic extends FisherSolver {
 
 	// -----------METHODS OF CONSTRUCTOR------
 
-	private void initializeBids(Utility[][] utilities) {
+	private void initializeBids(Utility[][] utilities, double[] valuationSums) {
+
+
+		for (int i = 0; i < nofAgents; i++) {
+			for (int j = 0; j < nofGoods; j++) {
+				if (utilities[i][j] != null) {
+					bids[i][j] = utilities[i][j].getUtility(1)/valuationSums[i];
+				}
+			}
+		}
+		
+		/*
 		for (int i = 0; i < nofAgents; i++) {
 			for (int j = 0; j < nofGoods; j++) {
 				if (utilities[i][j] != null) {
@@ -146,10 +158,11 @@ public class FisherSolverCentralistic extends FisherSolver {
 				}
 			}
 		}
+		*/
 
 	}
 
-	private void initializeValuations(Utility[][] utilities) {
+	private double[] initializeValuations(Utility[][] utilities) {
 		final double[] valuationSums = new double[nofAgents]; // utilits sum of rows,
 		for (int i = 0; i < nofAgents; i++) {
 			for (int j = 0; j < nofGoods; j++) {
@@ -159,6 +172,7 @@ public class FisherSolverCentralistic extends FisherSolver {
 				}
 			}
 		}
+		return valuationSums;
 
 	}
 
@@ -181,8 +195,12 @@ public class FisherSolverCentralistic extends FisherSolver {
 					ans[i][j] = 0;
 
 				} else {
-					ans[i][j] = valuations[i][j].getUtility(currentAllocation[i][j]);
+					if (this.utilites==null) {
+						ans[i][j] = valuations[i][j].getUtility(1);
 
+					}else {
+					ans[i][j] = this.utilites[i][j];
+					}
 				}
 			}
 		}

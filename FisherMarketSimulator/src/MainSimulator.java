@@ -17,9 +17,9 @@ public class MainSimulator {
 	public static double muUtil = 100;
 	public static int numberTypes = 4;
 	public static int[] buyers = {2};
-	public static int[] goods = { 2 };
+	public static int[] goods = {2};
 	public static int meanRepsStart = 0;
-	public static int meanRepsEnd = 2;
+	public static int meanRepsEnd = 1;
 
 	public static int distributionParameterType = 1; // 1 = uniform, 2 = exp
 	public static int distributionDelayType = 1;// 1 = uniform, 2 = exp

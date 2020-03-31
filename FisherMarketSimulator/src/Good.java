@@ -56,8 +56,9 @@ public class Good implements Messageable, Comparable<Good> {
 		this.decisionCounter++;
 		updateBidsInMap(msgs);
 		double price = calculatePrice();
-		updateChange(price);
+		Map<Buyer, Double> lastAllocation = this.allocation;
 		this.allocation = reallocation(price);
+		updateChange(lastAllocation);
 		sendAllocation(allocation);
 	}
 	
@@ -71,13 +72,30 @@ public class Good implements Messageable, Comparable<Good> {
 
 	}
 
-	private void updateChange( double price) {
+	private void updateChange( Map<Buyer, Double> lastAllocation) {
+		
+		if (lastAllocation.isEmpty()) {
+			this.goodChange = Double.MAX_VALUE;
+		}else {
+			Double changeToUpdate = 0.0;
+			for (Buyer buyer : lastAllocation.keySet()) {
+				double currentBuyerAllocation = this.allocation.get(buyer);
+				double lastBuyerAllocation = lastAllocation.get(buyer);
+				double delta = currentBuyerAllocation-lastBuyerAllocation;	
+				changeToUpdate+=Math.abs(delta);
+			}
+			this.goodChange = changeToUpdate;
+		}
+			
+		
+		
 		//double sumAllocation = 0;
 		/*
 		for (Double singleAllocation : allocation.values()) {
 			sumAllocation = sumAllocation + singleAllocation;
 		}
 		*/
+		/*
 		if (this.goodChange == -1) {
 			this.goodChange = Double.MAX_VALUE;
 		} else {
@@ -95,6 +113,7 @@ public class Good implements Messageable, Comparable<Good> {
 				
 				goodChange += t;
 			}
+			
 			/*
 			 * 
 			 * change += Math
@@ -103,7 +122,7 @@ public class Good implements Messageable, Comparable<Good> {
 			
 		}
 
-	}
+	
 
 	private Map<Buyer, Double> reallocation(double price) {
 		Map<Buyer, Double> ans = new HashMap<Buyer, Double>();
