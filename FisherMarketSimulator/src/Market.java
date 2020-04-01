@@ -16,6 +16,7 @@ public class Market {
 	private Utility[][] R;
 	private Mailer mailer;
 	private SortedMap<Integer, double[][]> parameterDelayMartix;
+	private int currentParameter;
 
 	public Market(int buyersNum, int goodsNum, Random rUtil, Random rGoodTypes, int i) {
 		this.id = i;
@@ -46,7 +47,7 @@ public class Market {
 
 	@Override
 	public String toString() {
-		String ans = "Market number: " + id + ", " + "buyers: " + buyers.size() + ", goods: " + goods.size();
+		String ans = "Market number: " + id + ", " + "buyers: " + buyers.size() + ", goods: " + goods.size()+ ", parameter: " + this.currentParameter;
 
 		return ans;
 	}
@@ -82,11 +83,11 @@ public class Market {
 	}
 
 	public void restartMarketBetweenRuns(Mailer mailer, int parameter) {
+		
+		//updateMailer(mailer, parameter);
+		this.currentParameter = parameter;
 		this.mailer = mailer;
-		this.mailer.updateSeeds(this.id);
-		double[][] parameterMatrix = this.parameterDelayMartix.get(parameter);
-		this.mailer.setParameterMatrix(parameterMatrix);
-		this.mailer.emptyMessageBox();
+
 		for (Good g : this.goods) {
 			g.updateMailer(this.mailer);
 			g.resetGoodsBetweenRuns();
@@ -97,6 +98,19 @@ public class Market {
 			b.resetBuyerBetweenRuns();
 		}
 
+	}
+
+	private void updateMailer(Mailer mailer, int parameter) {
+		this.currentParameter = parameter;
+		this.mailer = mailer;
+		double[][] parameterMatrix = this.parameterDelayMartix.get(parameter);
+		this.mailer.setParameterMatrix(parameterMatrix);
+		this.mailer.emptyMessageBox();
+		this.mailer.updateSeeds(this.id,parameter);
+		this.mailer.updateParameter(parameter);
+
+		
+		
 	}
 
 	public Utility[][] getR() {
@@ -147,6 +161,15 @@ public class Market {
 			}
 		}
 		return ans;
+	}
+
+	public int getCurrentParameter() {
+		return currentParameter;
+	}
+
+	public double[][] getParametersMatrix(int parameter) {
+		this.currentParameter = parameter;
+		return this.parameterDelayMartix.get(parameter);
 	}
 
 }

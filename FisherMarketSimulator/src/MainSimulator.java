@@ -8,22 +8,24 @@ import java.util.Random;
 public class MainSimulator {
 
 	// ------- VARIABLES TO CHECK BEFORE STARTING A RUN
-	// -- variables of dcop problem
+	
 
-	public static boolean central = true;
-	protected static final double THRESHOLD = 1E-2;
-	public static int maxIteration = 1000;
+	public static boolean central = false;
+	public static boolean printForDebug =false;
+	protected static final double THRESHOLD = 1E-4;
 	public static double stdUtil = 100;
 	public static double muUtil = 100;
 	public static int numberTypes = 4;
-	public static int[] buyers = {2};
-	public static int[] goods = {2};
+	public static int[] buyers = {10};
+	public static int[] goods = {10};
 	public static int meanRepsStart = 0;
-	public static int meanRepsEnd = 1;
+	public static int meanRepsEnd = 100;
 
-	public static int distributionParameterType = 1; // 1 = uniform, 2 = exp
-	public static int distributionDelayType = 1;// 1 = uniform, 2 = exp
-	public static int[] distributionParameters = { 0 };
+	public static int distributionParameterType = 2; // 1 = uniform, 2 = exp
+	public static int distributionDelayType = 2;// 1 = uniform, 2 = exp
+	public static int[] distributionParameters = {0,10,25};
+	public static int maxIteration = 1000;
+
 	// public static double[] p4s = { 0,1 };
 	public static boolean considerDecisionCounter = true;
 
@@ -77,7 +79,7 @@ public class MainSimulator {
 
 	private static void createExcel() {
 		
-		for (int i = 1; i <= 4; i++) {
+		for (int i = 3; i <= 3; i++) {
 			
 			if (i==1) {
 				createFile(averageData, i);
@@ -152,35 +154,6 @@ public class MainSimulator {
 		return typeFile + central1 + meanRepsStart1 + meanRepsEnd1;
 	}
 
-	private static void runCentralistic(List<List<Market>> markets) {
-
-		for (List<Market> list : markets) {
-			List<List<FisherData>> toBeAverage = new ArrayList<List<FisherData>>();
-			int max = 0;
-			for (Market market : list) {
-
-				FisherSolver f = new FisherSolverCentralistic(market);
-				List<FisherData> lonelyRunData = f.algorithm();
-				max = updateMaxIteration(max, lonelyRunData.size());
-				toBeAverage.add(lonelyRunData);
-				allData.addAll(lonelyRunData);
-				allDataLast.add(lonelyRunData.get(lonelyRunData.size() - 1));
-				System.out.println(market);
-			}
-
-			List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
-			averageDataLast.add(calculateAverageLast(lastToBeAverage));
-
-			toBeAverage = fixAverage(toBeAverage, max);
-			List<FisherData> average = calculateAverage(toBeAverage, max);
-			averageData.addAll(average);
-
-			// averageDataLast;
-
-			// dataToBeAverage.add(toBeAverage);
-		}
-
-	}
 
 	private static FisherData calculateAverageLast(List<FisherData> lastToBeAverage) {
 
@@ -359,34 +332,73 @@ public class MainSimulator {
 
 	private static void runDistributed(List<List<Market>> markets) {
 
-		Mailer mailer = new Mailer(distributionDelayType);
 		for (List<Market> marketReps : markets) {
-			runDifferentCommunicationOnMarketReps(marketReps, mailer);
+			runDifferentCommunicationOnMarketReps(marketReps);
 		}
 
 	}
 
-	private static void runDifferentCommunicationOnMarketReps(List<Market> marketReps, Mailer mailer) {
+	private static void runDifferentCommunicationOnMarketReps(List<Market> marketReps) {
 
-		List<List<FisherData>> toBeAverage = new ArrayList<List<FisherData>>();
-		int max = 0;
 
 		for (int parameter : distributionParameters) {
+			int max = 0;
+			List<List<FisherData>> toBeAverage = new ArrayList<List<FisherData>>();
 			for (Market market : marketReps) {
+				
+				double[][] parameterMatrix = market.getParametersMatrix(parameter);
+				Mailer mailer = new Mailer(distributionDelayType,parameter, parameterMatrix);
 				market.restartMarketBetweenRuns(mailer, parameter);
+			
 				FisherSolver f = new FisherSolverDistributed(market);
-
 				List<FisherData> lonlyRunData = f.algorithm();
 				max = updateMaxIteration(max, lonlyRunData.size());
 				toBeAverage.add(lonlyRunData);
 				allData.addAll(lonlyRunData);
+				allDataLast.add(lonlyRunData.get(lonlyRunData.size() - 1));
+				System.out.println(market);
 			}
+			
+			List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
+			averageDataLast.add(calculateAverageLast(lastToBeAverage));
 			toBeAverage = fixAverage(toBeAverage, max);
 			List<FisherData> average = calculateAverage(toBeAverage, max);
 			averageData.addAll(average);
 		}
 
 	}
+	
+	
+	private static void runCentralistic(List<List<Market>> markets) {
+
+		for (List<Market> list : markets) {
+			List<List<FisherData>> toBeAverage = new ArrayList<List<FisherData>>();
+			int max = 0;
+			for (Market market : list) {
+
+				FisherSolver f = new FisherSolverCentralistic(market);
+				List<FisherData> lonelyRunData = f.algorithm();
+				max = updateMaxIteration(max, lonelyRunData.size());
+				toBeAverage.add(lonelyRunData);
+				allData.addAll(lonelyRunData);
+				allDataLast.add(lonelyRunData.get(lonelyRunData.size() - 1));
+				//System.out.println(market);
+			}
+
+			List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
+			averageDataLast.add(calculateAverageLast(lastToBeAverage));
+
+			toBeAverage = fixAverage(toBeAverage, max);
+			List<FisherData> average = calculateAverage(toBeAverage, max);
+			averageData.addAll(average);
+
+			// averageDataLast;
+
+			// dataToBeAverage.add(toBeAverage);
+		}
+
+	}
+
 
 	private static int updateMaxIteration(int maxIteration, int currentMaxIter) {
 		if (maxIteration < currentMaxIter) {

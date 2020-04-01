@@ -15,9 +15,9 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 	private Random randomUtil;
 	private Mailer mailer;
 	private int decisionCounter;
-	private HashMap<Good, Message> messageRecived;
-	private HashMap<Good, Double> bidsMap;
-	private HashMap<Good, Double> updatedUtilitiesMap;
+	private SortedMap<Good, Message> messageRecived;
+	private SortedMap<Good, Double> bidsMap;
+	private SortedMap<Good, Double> updatedUtilitiesMap;
 	//private HashMap<Good, Utility> utilitiesMap;
 	
 	
@@ -73,10 +73,10 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 
 	private void initMapsInVariables() {
 		this.decisionCounter= 0;
-		this.messageRecived = new HashMap<Good, Message>();
-		this.bidsMap = new HashMap<Good, Double>();
+		this.messageRecived = new TreeMap<Good, Message>();
+		this.bidsMap = new TreeMap<Good, Double>();
 		//this.utilitiesMap = new HashMap<Good, Utility>();
-		this.updatedUtilitiesMap = new HashMap<Good, Double>();
+		this.updatedUtilitiesMap = new TreeMap<Good, Double>();
 
 	}
 

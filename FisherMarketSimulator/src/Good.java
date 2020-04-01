@@ -2,17 +2,19 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class Good implements Messageable, Comparable<Good> {
 
 	private int type;
 	private int id;
 	private Mailer mailer;
-	private Map<Buyer, Double> bidsRecieved;
+	private SortedMap<Buyer, Double> bidsRecieved;
 	private int decisionCounter;
-	private Map<Buyer, Message> messageRecived;
+	private SortedMap<Buyer, Message> messageRecived;
 	private double goodChange;
-	private Map<Buyer, Double> allocation;
+	private SortedMap<Buyer, Double> allocation;
 
 	public Good(int type, int i) {
 		this.type = type;
@@ -22,8 +24,9 @@ public class Good implements Messageable, Comparable<Good> {
 	@Override
 	public String toString() {
 		// TODO Auto-generated method stub
-		return "g"+this.id;
+		return "g" + this.id;
 	}
+
 	public int getType() {
 		return this.type;
 	}
@@ -39,11 +42,11 @@ public class Good implements Messageable, Comparable<Good> {
 	}
 
 	public void resetGoodsBetweenRuns() {
-		this.bidsRecieved = new HashMap<Buyer, Double>();
+		this.bidsRecieved = new TreeMap<Buyer, Double>();
 		this.decisionCounter = 0;
-		this.messageRecived = new HashMap<Buyer, Message>();
+		this.messageRecived = new TreeMap<Buyer, Message>();
 		this.goodChange = -1;
-		this.allocation = new HashMap<Buyer, Double>();
+		this.allocation = new TreeMap<Buyer, Double>();
 
 	}
 
@@ -61,7 +64,6 @@ public class Good implements Messageable, Comparable<Good> {
 		updateChange(lastAllocation);
 		sendAllocation(allocation);
 	}
-	
 
 	private void sendAllocation(Map<Buyer, Double> allocation) {
 		for (Entry<Buyer, Double> e : allocation.entrySet()) {
@@ -72,64 +74,57 @@ public class Good implements Messageable, Comparable<Good> {
 
 	}
 
-	private void updateChange( Map<Buyer, Double> lastAllocation) {
-		
+	private void updateChange(Map<Buyer, Double> lastAllocation) {
+
 		if (lastAllocation.isEmpty()) {
 			this.goodChange = Double.MAX_VALUE;
-		}else {
+		} else {
 			Double changeToUpdate = 0.0;
 			for (Buyer buyer : lastAllocation.keySet()) {
 				double currentBuyerAllocation = this.allocation.get(buyer);
 				double lastBuyerAllocation = lastAllocation.get(buyer);
-				double delta = currentBuyerAllocation-lastBuyerAllocation;	
-				changeToUpdate+=Math.abs(delta);
+				double delta = currentBuyerAllocation - lastBuyerAllocation;
+				changeToUpdate += Math.abs(delta);
 			}
 			this.goodChange = changeToUpdate;
 		}
-			
-		
-		
-		//double sumAllocation = 0;
+
+		// double sumAllocation = 0;
 		/*
-		for (Double singleAllocation : allocation.values()) {
-			sumAllocation = sumAllocation + singleAllocation;
-		}
-		*/
+		 * for (Double singleAllocation : allocation.values()) { sumAllocation =
+		 * sumAllocation + singleAllocation; }
+		 */
 		/*
-		if (this.goodChange == -1) {
-			this.goodChange = Double.MAX_VALUE;
-		} else {
-			goodChange = 0;
+		 * if (this.goodChange == -1) { this.goodChange = Double.MAX_VALUE; } else {
+		 * goodChange = 0;
+		 * 
+		 * for (Entry<Buyer, Double> e : this.allocation.entrySet()) { Buyer b =
+		 * e.getKey(); double bid = this.bidsRecieved.get(b); double currentAllocation =
+		 * bid/ price; double pastAllocation = e.getValue(); double t= currentAllocation
+		 * - pastAllocation; if (t<0) { t=t*(-1); }
+		 * 
+		 * goodChange += t; }
+		 * 
+		 * /*
+		 * 
+		 * change += Math .abs(((bids[i][j]/ prices[j]) -
+		 * currentAllocation[i][j]));///aaaa
+		 */
 
-			for (Entry<Buyer, Double> e : this.allocation.entrySet()) {
-				Buyer b = e.getKey();
-				double bid = this.bidsRecieved.get(b);
-				double currentAllocation = bid/ price;
-				double pastAllocation = e.getValue();
-				double t= currentAllocation - pastAllocation;
-				if (t<0) {
-					t=t*(-1);
-				}
-				
-				goodChange += t;
-			}
-			
-			/*
-			 * 
-			 * change += Math
-						.abs(((bids[i][j]/ prices[j]) - currentAllocation[i][j]));///aaaa
-			 */
-			
-		}
+	}
 
-	
-
-	private Map<Buyer, Double> reallocation(double price) {
-		Map<Buyer, Double> ans = new HashMap<Buyer, Double>();
+	private SortedMap<Buyer, Double> reallocation(double price) {
+		SortedMap<Buyer, Double> ans = new TreeMap<Buyer, Double>();
 		for (Entry<Buyer, Double> e : this.bidsRecieved.entrySet()) {
 			Buyer p = e.getKey();
 			Double bid = e.getValue();
-			ans.put(p, bid / price);
+
+			Double resingleAllocation = bid / price;
+			if (resingleAllocation > MainSimulator.THRESHOLD) {
+				ans.put(p, resingleAllocation);
+			} else {
+				ans.put(p, 0.0);
+			}
 		}
 		return ans;
 	}

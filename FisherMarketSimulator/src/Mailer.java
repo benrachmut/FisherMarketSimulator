@@ -16,15 +16,20 @@ public class Mailer {
 	private Random randomDelay;
 	private RandomNumberGenerator randomMaker;
 	private double[][] parameters;
-	public Mailer(int distributionType) {
+	private int currentParameter;
+	public Mailer(int distributionType, int parameter, double[][] parametersss) {
 		this.messageBox= new ArrayList<Message>();
 		if (distributionType == 1) {
 			randomMaker = RandomNumberGenerator.Uniform;
 		}
 		if (distributionType == 2) {
 			randomMaker = RandomNumberGenerator.Exponential;
-
 		}
+		currentParameter = parameter;
+		randomDelay = new Random(parameter);
+		this.parameters = parametersss;
+		messageBox = new ArrayList<Message>();
+		
 	}
 	
 	public void updateParameters(double [][] input) {
@@ -33,12 +38,13 @@ public class Mailer {
 	
 	
 
-	public void updateSeeds(long s) {
-		this.randomDelay= new Random(s+100);
+	public void updateSeeds(long s, int parameter) {
+		this.randomDelay= new Random(parameter+1);
+		
 	}
-	
-	
-	
+	public void updateParameter( int parameter) {
+	this.currentParameter = parameter;
+	}
 	public void createMessage(Messageable sender, int decisionCounter, Messageable reciever, double context) {
 		int buyerId, goodId;
 		if (sender instanceof Buyer) {
@@ -60,6 +66,9 @@ public class Mailer {
 	
 	private int createDelay(int buyerId, int goodId) {
 		double parameter = this.parameters[buyerId][goodId];
+		if (parameter == 0 ) {
+			return 0;
+		}
 		return (int)this.randomMaker.getRandom(this.randomDelay, parameter);
 	}
 	
@@ -90,12 +99,12 @@ public class Mailer {
 		this.messageBox = new ArrayList<Message>();
 		
 	}
-
+/*
 	public void restart(long i) {		
 		this.messageBox= new ArrayList<Message>();
 		this.updateSeeds(i);
 	}
-
+*/
 	
 
 	public void setParameterMatrix(double[][] intput) {
@@ -104,7 +113,7 @@ public class Mailer {
 
 	public int getParameter() {
 		// TODO Auto-generated method stub
-		return MainSimulator.currParameter;
+		return currentParameter;
 	}
 
 	public int getDistributionDelay() {
@@ -115,6 +124,12 @@ public class Mailer {
 	public int getDistributionParameter() {
 		// TODO Auto-generated method stub
 		return MainSimulator.distributionParameterType;
+	}
+
+	public void printMailBox() {
+		for (int i = 0; i < this.messageBox.size(); i++) {
+			System.out.println("index: "+i+", message: "+messageBox.get(i));
+		}
 	}
 
 

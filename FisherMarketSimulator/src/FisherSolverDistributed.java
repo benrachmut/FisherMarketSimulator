@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public class FisherSolverDistributed extends FisherSolver {
 
@@ -51,19 +53,94 @@ public class FisherSolverDistributed extends FisherSolver {
 	}
 
 	public FisherData iterate() {
+		//System.out.println("______" + iterations + "______");
+		//mailer.printMailBox();
+		
 		List<Message> msgToSend = mailer.handleDelay();
-		Map<Messageable, List<Message>> receiversMap = createReciversMap(msgToSend);
-		sendMessages(receiversMap);
+		sendMessages(msgToSend);
+		// Map<Messageable, List<Message>> receiversMap = createReciversMap(msgToSend);
+		// sendMessages(receiversMap);
 		this.allocation = createCentralisticAllocation();
 		updateChange();
 		FisherData ans = new FisherDataDistributed(this.allocation, this.R, this.iterations, this.market, this.mailer);
 		return ans;
 	}
 
+	private void sendMessages(List<Message> msgToSend) {
+		SortedMap<Buyer, List<Message>> recieversMapBuyer = createReciversMapBuyer(msgToSend);
+		sendMessagesBuyers(recieversMapBuyer);
+		SortedMap<Good, List<Message>> recieversMapGood = createReciversMapGood(msgToSend);
+		sendMessagesGoods(recieversMapGood);
+	}
+
+	private void sendMessagesGoods(SortedMap<Good, List<Message>> recieversMapGood) {
+		for (Entry<Good, List<Message>> e : recieversMapGood.entrySet()) {
+			Messageable reciever = e.getKey();
+			List<Message> msgsRecieved = e.getValue();
+			reciever.recieveMessage(msgsRecieved);
+		}
+	}
+
+	private SortedMap<Good, List<Message>> createReciversMapGood(List<Message> msgToSend) {
+		
+		SortedMap<Good, List<Message>> ans = new TreeMap<Good, List<Message>>();
+		for (Message m : msgToSend) {
+			Messageable reciever = m.getReciever();
+			if (reciever instanceof Good) {
+				if (!ans.containsKey(reciever)) {
+					List<Message> l = new ArrayList<Message>();
+					ans.put((Good) reciever, l);
+				}
+				ans.get((Good) reciever).add(m);
+			}
+		}
+		return ans;
+	}
+
+	private void sendMessagesBuyers(SortedMap<Buyer, List<Message>> recieversMapBuyer) {
+		for (Entry<Buyer, List<Message>> e : recieversMapBuyer.entrySet()) {
+			Messageable reciever = e.getKey();
+			List<Message> msgsRecieved = e.getValue();
+			reciever.recieveMessage(msgsRecieved);
+		}
+
+	}
+
+	private SortedMap<Buyer, List<Message>> createReciversMapBuyer(List<Message> msgToSend) {
+		SortedMap<Buyer, List<Message>> ans = new TreeMap<Buyer, List<Message>>();
+
+		for (Message m : msgToSend) {
+			Messageable reciever = m.getReciever();
+			if (reciever instanceof Buyer) {
+				if (!ans.containsKey(reciever)) {
+					List<Message> l = new ArrayList<Message>();
+					ans.put((Buyer) reciever, l);
+				}
+				ans.get((Buyer) reciever).add(m);
+			}
+		}
+		return ans;
+	}
+
+	private void printMsgsToSend(List<Message> msgToSend) {
+		int count = 0;
+		for (Message message : msgToSend) {
+
+			System.out.println("message number: " + count + ", " + message);
+			count++;
+		}
+
+	}
+
 	private void updateChange() {
 		double ans = 0.0;
 		for (Good g : this.goods) {
-			ans+=g.getGoodChanges();
+			double gChange = g.getGoodChanges();
+			if (gChange == -1) {
+				this.change = Double.MAX_VALUE;
+				return;
+			}
+			ans += gChange;
 		}
 		this.change = ans;
 
