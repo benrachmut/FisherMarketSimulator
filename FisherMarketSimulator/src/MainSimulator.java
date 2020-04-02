@@ -8,25 +8,32 @@ import java.util.Random;
 public class MainSimulator {
 
 	// ------- VARIABLES TO CHECK BEFORE STARTING A RUN
-
-	public static boolean central = false;
 	public static boolean printForDebug = false;
-	protected static final double THRESHOLD = 1E-4;
+	public static boolean envyDebug=true;
+	
+	
+	
+	public static boolean central = true;
+
+
+	protected static final double THRESHOLD = 1E-10;
 	public static double stdUtil = 100;
 	public static double muUtil = 100;
 	public static int numberTypes = 4;
-	public static int[] buyers = { 10 };
-	public static int[] goods = { 10 };
+	public static int[] buyers = { 6 };
+	public static int[] goods = { 9 };
 	public static int meanRepsStart = 0;
-	public static int meanRepsEnd = 100;
+	public static int meanRepsEnd = 1;
 
 	public static int distributionParameterType = 1; // 1 = uniform, 2 = exp
 	public static int distributionDelayType = 1;// 1 = uniform, 2 = exp
 
 	public static String distributionParameterString;
 	public static String distributionDelayString;
+	
+	public static boolean simplisticDelay = true;
 	public static int[] distributionParameters = { 0, 25, 50, 200, 500 };
-	public static int maxIteration = 100;
+	public static int maxIteration = 1000000;
 
 	// public static double[] p4s = { 0,1 };
 	public static boolean considerDecisionCounter = true;
@@ -47,6 +54,7 @@ public class MainSimulator {
 	private static List<FisherData> averageDataLast = new ArrayList<FisherData>();
 
 	private static List<FisherDataDelay> averageWeightedDelayPerParameter = new ArrayList<FisherDataDelay>();
+	public static double epsilonEnvyFree = 0.05;
 
 	public static void main(String[] args) {
 
@@ -370,18 +378,22 @@ public class MainSimulator {
 				handleData(data, toBeAverage, averageDelayPerMarket, mailer, market, parameter);
 				System.out.println(market);
 			}
-			FisherDataDelay averageDelay = createWeightedDealyData(averageDelayPerMarket);
-			averageWeightedDelayPerParameter.add(averageDelay);
+			//FisherDataDelay averageDelay = createWeightedDealyData(averageDelayPerMarket);
+			//averageWeightedDelayPerParameter.add(averageDelay);
+			handleAverageData(toBeAverage, max);
 			
-			List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
-			averageDataLast.add(calculateAverageLast(lastToBeAverage));
-			
-			toBeAverage = fixAverage(toBeAverage, max);
-			List<FisherData> average = calculateAverage(toBeAverage, max);
-			averageData.addAll(average);
 		}
 
 	}
+	private static void handleAverageData(List<List<FisherData>> toBeAverage, int max) {
+		List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
+		averageDataLast.add(calculateAverageLast(lastToBeAverage));
+		toBeAverage = fixAverage(toBeAverage, max);
+		List<FisherData> average = calculateAverage(toBeAverage, max);
+		averageData.addAll(average);
+		
+	}
+
 	/*
 	private static FisherDataDelay createWeightedDealyData(List<FisherDataDelay> averageDelayPerMarket) {
 		new

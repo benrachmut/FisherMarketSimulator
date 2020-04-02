@@ -96,17 +96,20 @@ public abstract class FisherSolver {
 
 	protected abstract double[][] getBids();
 
-	private static void print2DArray(double[][] input) {
+	public static void print2DArray(double[][] input) {
 		System.out.println();
 
 		for (int i = 0; i < input.length; i++) {
 			System.out.print("|");
 			for (int j = 0; j < input[i].length; j++) {
 				System.out.print("[" + input[i][j] + "]");
+				//System.out.print(input[i][j] + ",");
+
 			}
 			System.out.print("|");
 			System.out.println();
 		}
+		
 		System.out.println();
 	}
 
@@ -158,7 +161,7 @@ public abstract class FisherSolver {
 	public boolean isStable() {
 		boolean isStable = change < MainSimulator.THRESHOLD;
 		boolean isComplete = this.iterations == MainSimulator.maxIteration;
-		return isComplete;
+		return isComplete||isStable;
 	}
 
 }

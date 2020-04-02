@@ -47,7 +47,8 @@ public class Market {
 
 	@Override
 	public String toString() {
-		String ans = "Market number: " + id + ", " + "buyers: " + buyers.size() + ", goods: " + goods.size()+ ", parameter: " + this.currentParameter;
+		String ans = "Market number: " + id + ", " + "buyers: " + buyers.size() + ", goods: " + goods.size()
+				+ ", parameter: " + this.currentParameter;
 
 		return ans;
 	}
@@ -83,8 +84,8 @@ public class Market {
 	}
 
 	public void restartMarketBetweenRuns(Mailer mailer, int parameter) {
-		
-		//updateMailer(mailer, parameter);
+
+		// updateMailer(mailer, parameter);
 		this.currentParameter = parameter;
 		this.mailer = mailer;
 
@@ -106,11 +107,9 @@ public class Market {
 		double[][] parameterMatrix = this.parameterDelayMartix.get(parameter);
 		this.mailer.setParameterMatrix(parameterMatrix);
 		this.mailer.emptyMessageBox();
-		this.mailer.updateSeeds(this.id,parameter);
+		this.mailer.updateSeeds(this.id, parameter);
 		this.mailer.updateParameter(parameter);
 
-		
-		
 	}
 
 	public Utility[][] getR() {
@@ -139,12 +138,22 @@ public class Market {
 
 		if (parameter == 0) {
 			value = setParametersToZero();
-			
 		} else {
+
 			Random r = new Random(id);
-			for (int i = 0; i < R.length; i++) {
-				for (int j = 0; j < R[i].length; j++) {
-					value[i][j] = rng.getRandom(r, parameter);
+
+			if (MainSimulator.simplisticDelay) {
+				//cvbcvbcv
+				
+				
+				
+				
+			} else {
+				
+				for (int i = 0; i < R.length; i++) {	
+					for (int j = 0; j < R[i].length; j++) {
+						value[i][j] = rng.getRandom(r, parameter);
+					}
 				}
 			}
 		}

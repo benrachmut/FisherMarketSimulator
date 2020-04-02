@@ -70,6 +70,11 @@ public class Mailer {
 	
 	
 	private int createDelay(int buyerId, int goodId) {
+		
+		
+		
+		
+		if
 		double parameter = this.parameters[buyerId][goodId];
 		if (parameter == 0 ) {
 			this.delays.add(0.0);
