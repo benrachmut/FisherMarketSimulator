@@ -58,8 +58,6 @@ public class FisherSolverDistributed extends FisherSolver {
 		
 		List<Message> msgToSend = mailer.handleDelay();
 		sendMessages(msgToSend);
-		// Map<Messageable, List<Message>> receiversMap = createReciversMap(msgToSend);
-		// sendMessages(receiversMap);
 		this.allocation = createCentralisticAllocation();
 		updateChange();
 		FisherData ans = new FisherDataDistributed(this.allocation, this.R, this.iterations, this.market, this.mailer);

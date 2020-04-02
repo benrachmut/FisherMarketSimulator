@@ -17,6 +17,8 @@ public class Mailer {
 	private RandomNumberGenerator randomMaker;
 	private double[][] parameters;
 	private int currentParameter;
+	private List<Double> delays;
+	
 	public Mailer(int distributionType, int parameter, double[][] parametersss) {
 		this.messageBox= new ArrayList<Message>();
 		if (distributionType == 1) {
@@ -25,10 +27,11 @@ public class Mailer {
 		if (distributionType == 2) {
 			randomMaker = RandomNumberGenerator.Exponential;
 		}
-		currentParameter = parameter;
+		this.currentParameter = parameter;
 		randomDelay = new Random(parameter);
 		this.parameters = parametersss;
 		messageBox = new ArrayList<Message>();
+		delays = new ArrayList<Double>();
 		
 	}
 	
@@ -45,6 +48,8 @@ public class Mailer {
 	public void updateParameter( int parameter) {
 	this.currentParameter = parameter;
 	}
+	
+	
 	public void createMessage(Messageable sender, int decisionCounter, Messageable reciever, double context) {
 		int buyerId, goodId;
 		if (sender instanceof Buyer) {
@@ -67,9 +72,12 @@ public class Mailer {
 	private int createDelay(int buyerId, int goodId) {
 		double parameter = this.parameters[buyerId][goodId];
 		if (parameter == 0 ) {
+			this.delays.add(0.0);
 			return 0;
 		}
-		return (int)this.randomMaker.getRandom(this.randomDelay, parameter);
+		int delay = (int)this.randomMaker.getRandom(this.randomDelay, parameter);
+		this.delays.add((double)delay);
+		return delay;
 	}
 	
 	/*
@@ -130,6 +138,11 @@ public class Mailer {
 		for (int i = 0; i < this.messageBox.size(); i++) {
 			System.out.println("index: "+i+", message: "+messageBox.get(i));
 		}
+	}
+
+	public List<Double> getDelays() {
+		// TODO Auto-generated method stub
+		return this.delays;
 	}
 
 

@@ -8,23 +8,25 @@ import java.util.Random;
 public class MainSimulator {
 
 	// ------- VARIABLES TO CHECK BEFORE STARTING A RUN
-	
 
 	public static boolean central = false;
-	public static boolean printForDebug =false;
+	public static boolean printForDebug = false;
 	protected static final double THRESHOLD = 1E-4;
 	public static double stdUtil = 100;
 	public static double muUtil = 100;
 	public static int numberTypes = 4;
-	public static int[] buyers = {10};
-	public static int[] goods = {10};
+	public static int[] buyers = { 10 };
+	public static int[] goods = { 10 };
 	public static int meanRepsStart = 0;
 	public static int meanRepsEnd = 100;
 
-	public static int distributionParameterType = 2; // 1 = uniform, 2 = exp
-	public static int distributionDelayType = 2;// 1 = uniform, 2 = exp
-	public static int[] distributionParameters = {0,10,25};
-	public static int maxIteration = 1000;
+	public static int distributionParameterType = 1; // 1 = uniform, 2 = exp
+	public static int distributionDelayType = 1;// 1 = uniform, 2 = exp
+
+	public static String distributionParameterString;
+	public static String distributionDelayString;
+	public static int[] distributionParameters = { 0, 25, 50, 200, 500 };
+	public static int maxIteration = 100;
 
 	// public static double[] p4s = { 0,1 };
 	public static boolean considerDecisionCounter = true;
@@ -41,11 +43,14 @@ public class MainSimulator {
 
 	private static List<FisherData> allData = new ArrayList<FisherData>();
 	private static List<FisherData> averageData = new ArrayList<FisherData>();
-
 	private static List<FisherData> allDataLast = new ArrayList<FisherData>();
 	private static List<FisherData> averageDataLast = new ArrayList<FisherData>();
 
+	private static List<FisherDataDelay> averageWeightedDelayPerParameter = new ArrayList<FisherDataDelay>();
+
 	public static void main(String[] args) {
+
+		handleDistributions();
 
 		List<List<Market>> markets = createMarkets();
 		if (central) {
@@ -57,9 +62,25 @@ public class MainSimulator {
 		createExcel();
 	}
 
+	private static void handleDistributions() {
+		if (distributionDelayType == 1) {
+			distributionDelayString = "Uniform";
+		} else {
+			distributionDelayString = "Exponential";
+		}
+
+		if (distributionParameterType == 1) {
+			distributionParameterString = "Uniform";
+		} else {
+			distributionParameterString = "Exponential";
+		}
+
+	}
+
 	private static void setParametersForMarkets(List<List<Market>> markets) {
 		RandomNumberGenerator rng = null;
 		if (distributionParameterType == 1) {
+
 			rng = RandomNumberGenerator.Uniform;
 		}
 
@@ -78,24 +99,24 @@ public class MainSimulator {
 	}
 
 	private static void createExcel() {
-		
-		for (int i = 3; i <= 3; i++) {
-			
-			if (i==1) {
+
+		for (int i = 1; i <= 4; i++) {
+
+			if (i == 1) {
 				createFile(averageData, i);
 			}
-			if (i==2) {
+			if (i == 2) {
 				createFile(allData, i);
 			}
-			if (i==3) {
+			if (i == 3) {
 				createFile(averageDataLast, i);
 			}
-			if (i==4) {
+			if (i == 4) {
 				createFile(allDataLast, i);
 			}
-			
+
 		}
-		
+
 	}
 
 	private static void createFile(List<FisherData> data, int input) {
@@ -119,41 +140,38 @@ public class MainSimulator {
 	}
 
 	private static String createHeader() {
-		
-		String ans = "id," + "numByuers," + "numGoods," + "iteration," + 
-		"algo," + "maxIteration," + "sumRX,"+ "envyFree";
-		
-
-		if (!central) {
-			ans = ans + "," + "parameter" + "," + "distributionDelay" + "," + "distributionParameter";
+		if (central) {
+			return FisherData.header();
 		}
-		return ans;
+
+		else {
+			return FisherDataDistributed.extendedHeader();
+		}
 	}
 
 	private static String createFileName(int input) {
 
 		String typeFile = null;
-		if (input==1) {
+		if (input == 1) {
 			typeFile = "averageAll";
-		} 
-		if(input==2){
+		}
+		if (input == 2) {
 			typeFile = "fullAll";
 		}
-		if(input==3){
+		if (input == 3) {
 			typeFile = "averageLast";
 		}
-		if(input==4){
+		if (input == 4) {
 			typeFile = "fullLast";
 		}
-		
-		typeFile = "typeFile_"+typeFile+",";
+
+		typeFile = "typeFile_" + typeFile + ",";
 		String central1 = "central_" + central + ",";
 		String meanRepsStart1 = "start_" + meanRepsStart + ",";
-		String meanRepsEnd1 = "end_" + meanRepsEnd ;
-		
+		String meanRepsEnd1 = "end_" + meanRepsEnd;
+
 		return typeFile + central1 + meanRepsStart1 + meanRepsEnd1;
 	}
-
 
 	private static FisherData calculateAverageLast(List<FisherData> lastToBeAverage) {
 
@@ -340,35 +358,66 @@ public class MainSimulator {
 
 	private static void runDifferentCommunicationOnMarketReps(List<Market> marketReps) {
 
-
 		for (int parameter : distributionParameters) {
 			int max = 0;
 			List<List<FisherData>> toBeAverage = new ArrayList<List<FisherData>>();
+			List<FisherDataDelay> averageDelayPerMarket = new ArrayList<FisherDataDelay>();
+
 			for (Market market : marketReps) {
-				
-				double[][] parameterMatrix = market.getParametersMatrix(parameter);
-				Mailer mailer = new Mailer(distributionDelayType,parameter, parameterMatrix);
-				market.restartMarketBetweenRuns(mailer, parameter);
-			
-				FisherSolver f = new FisherSolverDistributed(market);
-				List<FisherData> lonlyRunData = f.algorithm();
-				max = updateMaxIteration(max, lonlyRunData.size());
-				toBeAverage.add(lonlyRunData);
-				allData.addAll(lonlyRunData);
-				allDataLast.add(lonlyRunData.get(lonlyRunData.size() - 1));
+				Mailer mailer = updateMarket(market, parameter);
+				List<FisherData> data = runFisher(market);
+				max = updateMaxIteration(max, data.size());
+				handleData(data, toBeAverage, averageDelayPerMarket, mailer, market, parameter);
 				System.out.println(market);
 			}
+			FisherDataDelay averageDelay = createWeightedDealyData(averageDelayPerMarket);
+			averageWeightedDelayPerParameter.add(averageDelay);
 			
 			List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
 			averageDataLast.add(calculateAverageLast(lastToBeAverage));
+			
 			toBeAverage = fixAverage(toBeAverage, max);
 			List<FisherData> average = calculateAverage(toBeAverage, max);
 			averageData.addAll(average);
 		}
 
 	}
-	
-	
+	/*
+	private static FisherDataDelay createWeightedDealyData(List<FisherDataDelay> averageDelayPerMarket) {
+		new
+		return null;
+	}
+	*/
+
+	private static void handleData(List<FisherData> data, List<List<FisherData>> toBeAverage, List<FisherDataDelay> averageDelayPerMarket, 
+			Mailer mailer, Market market, int inputParameter) {
+		toBeAverage.add(data);
+		allData.addAll(data);
+		allDataLast.add(data.get(data.size() - 1));		
+		handleDelayData(mailer,market, averageDelayPerMarket, inputParameter);
+	}
+
+	private static void handleDelayData(Mailer mailer, Market market, List<FisherDataDelay> averageDelayPerMarket, int inputParameter) {
+		List<Double> delays = mailer.getDelays();
+		int numberMessages = delays.size();
+		double averageDelay = calcAverage(delays);
+		FisherDataDelay fdDelay = new FisherDataDelay(market, distributionParameterString, distributionDelayString,inputParameter, averageDelay,numberMessages);
+		averageDelayPerMarket.add(fdDelay);
+
+	}
+
+	private static List<FisherData> runFisher(Market market) {
+		FisherSolver f = new FisherSolverDistributed(market);
+		return f.algorithm();
+	}
+
+	private static Mailer updateMarket(Market market, int parameter) {
+		double[][] parameterMatrix = market.getParametersMatrix(parameter);
+		Mailer mailer = new Mailer(distributionDelayType, parameter, parameterMatrix);
+		market.restartMarketBetweenRuns(mailer, parameter);
+		return mailer;
+	}
+
 	private static void runCentralistic(List<List<Market>> markets) {
 
 		for (List<Market> list : markets) {
@@ -382,9 +431,13 @@ public class MainSimulator {
 				toBeAverage.add(lonelyRunData);
 				allData.addAll(lonelyRunData);
 				allDataLast.add(lonelyRunData.get(lonelyRunData.size() - 1));
-				//System.out.println(market);
+				// System.out.println(market);
 			}
 
+			
+			
+			
+			
 			List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
 			averageDataLast.add(calculateAverageLast(lastToBeAverage));
 
@@ -398,7 +451,6 @@ public class MainSimulator {
 		}
 
 	}
-
 
 	private static int updateMaxIteration(int maxIteration, int currentMaxIter) {
 		if (maxIteration < currentMaxIter) {

@@ -71,6 +71,13 @@ public class FisherDataDistributed extends FisherData {
 		this.parameter=parameterF;
 		// TODO Auto-generated constructor stub
 	}
+	
+	
+	public static String extendedHeader() {
+		return FisherData.header()+"," + "Parameter" + "," + "Distribution Delay" + "," + "Distribution Parameter";
+	}
+	
+	
 /*
 	public int getUb() {
 		// TODO Auto-generated method stub

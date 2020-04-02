@@ -231,6 +231,9 @@ public class FisherData {
 		return this.envyFree;
 	}
 
-	
+	public static String header() {
+		return "Id," + "Byuers," + "Goods," + "Iteration," + 
+				"Algorithm," + "Max Iteration," + "Sum RX,"+ "Envy Free";
+	}
 	
 }

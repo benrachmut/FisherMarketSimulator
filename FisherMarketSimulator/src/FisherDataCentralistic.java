@@ -18,4 +18,5 @@ public class FisherDataCentralistic extends FisherData {
 				 considerDecisionCounterF,  maxIterationF,   avgRX, envyFree);
 	}
 
+	
 }
