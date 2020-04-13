@@ -68,13 +68,13 @@ public class Mailer {
 
 	
 	
-	
+	/*
 	private int createDelay(int buyerId, int goodId) {
 		
 		
 		
 		
-		if
+		
 		double parameter = this.parameters[buyerId][goodId];
 		if (parameter == 0 ) {
 			this.delays.add(0.0);
@@ -84,6 +84,7 @@ public class Mailer {
 		this.delays.add((double)delay);
 		return delay;
 	}
+	*/
 	
 	/*
 	private static int getRandomInt(Random r, int min, int max) {
@@ -128,16 +129,19 @@ public class Mailer {
 		// TODO Auto-generated method stub
 		return currentParameter;
 	}
-
+/*
 	public int getDistributionDelay() {
 		// TODO Auto-generated method stub
 		return MainSimulator.distributionDelayType;
 	}
+	*/
 	
+	/*
 	public int getDistributionParameter() {
 		// TODO Auto-generated method stub
 		return MainSimulator.distributionParameterType;
 	}
+	*/
 
 	public void printMailBox() {
 		for (int i = 0; i < this.messageBox.size(); i++) {

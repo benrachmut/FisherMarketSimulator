@@ -2,110 +2,160 @@ import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
 public class MainSimulator {
 
-	// ------- VARIABLES TO CHECK BEFORE STARTING A RUN
 	public static boolean printForDebug = false;
-	public static boolean envyDebug=true;
+	public static boolean envyDebug = true;
 	
-	
-	
+	//-------------MARKET PARAMETERS-------------
+	/*run the algorithm synchronous or asynchronous*/
 	public static boolean central = true;
-
-
+	/*delta of converges*/
 	protected static final double THRESHOLD = 1E-10;
+	/*parameters for withdrawing utilities 
+	 *maybe change to actual calculating withdrawing parameters*/
 	public static double stdUtil = 100;
 	public static double muUtil = 100;
 	public static int numberTypes = 4;
+	/*market size*/
 	public static int[] buyers = { 6 };
 	public static int[] goods = { 9 };
+	/*number of trials, start and ends*/
 	public static int meanRepsStart = 0;
 	public static int meanRepsEnd = 1;
-
-	public static int distributionParameterType = 1; // 1 = uniform, 2 = exp
-	public static int distributionDelayType = 1;// 1 = uniform, 2 = exp
-
-	public static String distributionParameterString;
-	public static String distributionDelayString;
-	
-	public static boolean simplisticDelay = true;
-	public static int[] distributionParameters = { 0, 25, 50, 200, 500 };
+	/*if algorithm does not converge what is the upper bound
+	 *avoid inf loop*/
 	public static int maxIteration = 1000000;
+	/*Random variables*/
+	public static Random utilRandom,goodTypesRandom;
+	/* sometimes agent is envy just a little and algo needs to continue alot until it changes */
+	public static double epsilonEnvyFree = 0.05;
+	
+	// public static int distributionParameterType = 1; // 1 = uniform, 2 = exp
+	// public static int distributionDelayType = 1;// 1 = uniform, 2 = exפ
+	// public static String distributionParameterString;
+	// public static String distributionDelayString;
+	// public static boolean simplisticDelay = true;
+	// public static int[] distributionParameters = { 0, 25, 50, 200, 500 };
 
-	// public static double[] p4s = { 0,1 };
+	
+	//-------------DELAY PARAMETERS-------------
+	 /* probability for communication to have atlist constant delays, with it create
+	 * matrix of buyers and goods, false = no delay at all, true = constant delay.
+	 * Note a buyer that holds a good causes for value in matrix to be false
+	 * regardless of probability withdrawn.*/
+	public static double[] dealyConstantSparsityProb = { 1 };// set with market
+	/*if sparse true constant delay present represents the velocity a message is passed*/ 
+	public static double[] delayConstant = { 5 };
+	 /* probability for communication to have noise in addition to the constant, 
+	 * with it create matrix of buyers and goods, 
+	 * false = no noise additionally to constant, 
+	 * true = noise additionally to constant. If dcsp the value for dnsp will be false as well. 
+	 * Therefore for buyers and goods actually to have noise is the 
+	 * Multiplication between dnsp and 1-dcsp.*/
+	public static double[] dealyNoiseSparsityProb = { 1 };// set with market
+	/*if sparse true for noise of delay is withdrawn from normal distribution*/ 
+	public static double[] delayMuNoise = { 10 };
+	public static double[] delayStdNoise = { 3 };
+	/* do we ignore messages that where overlapped?*/
 	public static boolean considerDecisionCounter = true;
+	/*Random variables*/
+	public static Random dealyConstantSparsityRand,dealyNoiseSparsityRand;
+	
+	
+	
+	//-------------DOWN PARAMETERS-------------
+	/*should csp be withdrawn or copied from dcsp*/
+	public static boolean copySparsityProb = false;// used in market
+	/*probability for communication to be blocked between buyers and goods, 
+	 * with it create matrix of buyers and goods or not
+	 * , false = no blocks, true = block may be created. 
+	 * Note a buyer that holds a good causes for value in matrix to be false 
+	 * regardless of probability withdrawn.*/
+	public static double[] downSparsityProb = { 0 };// set with market
+	/* counter for possible block each k computation*/
+	public static int[] downK = { 5 };
+	/*probability for a buyer to be completely cut completely. 
+	 If buyer holds a good, the good is also cut off.*/
+	public static double[] downInfProb = { 0 };
+	/*if buyer is not completely cut of, probability for a buyer 
+	 * to be cut of for a number of iterations.*/
+	public static double[] downNumIterProb = { 0 };
+	/*if buyer is cut of for number of iterations, 
+	 * parameter for withdrawing number of iterations.*/ 
+	public static int[] downNumIterParameter = { 0 };
+	/*Random variables*/
+	public static Random downSparsityRandom,downInfRandom,downNumIterRandom;
 
-	public static int currRep;
-	public static int currBuyersNum;
-	public static int currGoodsNum;
-	public static int currParameter;
-
-	public static Random randomUtil;
-	public static Random randomGoodTypes;
-
-	public static Random randomDistributionParameter = new Random();
-
+	
+	
+	//-------------Lists for data printing-------------
 	private static List<FisherData> allData = new ArrayList<FisherData>();
 	private static List<FisherData> averageData = new ArrayList<FisherData>();
 	private static List<FisherData> allDataLast = new ArrayList<FisherData>();
 	private static List<FisherData> averageDataLast = new ArrayList<FisherData>();
 
-	private static List<FisherDataDelay> averageWeightedDelayPerParameter = new ArrayList<FisherDataDelay>();
-	public static double epsilonEnvyFree = 0.05;
+	//-------------for code use-------------
+	public static int currRep;
+	public static int currBuyersNum;
+	public static int currGoodsNum;
+	public static int currParameter;
+
+	
 
 	public static void main(String[] args) {
 
-		handleDistributions();
+		// handleDistributions();
 
 		List<List<Market>> markets = createMarkets();
+		
 		if (central) {
 			runCentralistic(markets);
 		} else {
-			setParametersForMarkets(markets);
+			setSparsityForMarkets(markets);
 			runDistributed(markets);
 		}
 		createExcel();
 	}
 
-	private static void handleDistributions() {
-		if (distributionDelayType == 1) {
-			distributionDelayString = "Uniform";
-		} else {
-			distributionDelayString = "Exponential";
-		}
-
-		if (distributionParameterType == 1) {
-			distributionParameterString = "Uniform";
-		} else {
-			distributionParameterString = "Exponential";
-		}
-
-	}
-
-	private static void setParametersForMarkets(List<List<Market>> markets) {
-		RandomNumberGenerator rng = null;
-		if (distributionParameterType == 1) {
-
-			rng = RandomNumberGenerator.Uniform;
-		}
-
-		if (distributionParameterType == 2) {
-			rng = RandomNumberGenerator.Exponential;
-		}
-
+	private static void setSparsityForMarkets(List<List<Market>> markets) {
+		//dealyConstantSparsityProb, dealyNoiseSparsityProb, downSparsityProb
 		for (List<Market> list : markets) {
 			for (Market market : list) {
-				for (int parameter : distributionParameters) {
-					currParameter = parameter;
-					market.createParameterMatrix(parameter, rng);
-				}
+				setSparsityPerSingleMarket(market);
 			}
 		}
+		
+		
 	}
 
+	/*
+	 * private static void handleDistributions() { if (distributionDelayType == 1) {
+	 * distributionDelayString = "Uniform"; } else { distributionDelayString =
+	 * "Exponential"; }
+	 * 
+	 * if (distributionParameterType == 1) { distributionParameterString =
+	 * "Uniform"; } else { distributionParameterString = "Exponential"; }
+	 * 
+	 * }
+	 */
+	/*
+	 * private static void setParametersForMarkets(List<List<Market>> markets) {
+	 * RandomNumberGenerator rng = null; if (distributionParameterType == 1) {
+	 * 
+	 * rng = RandomNumberGenerator.Uniform; }
+	 * 
+	 * if (distributionParameterType == 2) { rng =
+	 * RandomNumberGenerator.Exponential; }
+	 * 
+	 * for (List<Market> list : markets) { for (Market market : list) { for (int
+	 * parameter : distributionParameters) { currParameter = parameter;
+	 * market.createParameterMatrix(parameter, rng); } } } }
+	 */
 	private static void createExcel() {
 
 		for (int i = 1; i <= 4; i++) {
@@ -378,42 +428,44 @@ public class MainSimulator {
 				handleData(data, toBeAverage, averageDelayPerMarket, mailer, market, parameter);
 				System.out.println(market);
 			}
-			//FisherDataDelay averageDelay = createWeightedDealyData(averageDelayPerMarket);
-			//averageWeightedDelayPerParameter.add(averageDelay);
+			// FisherDataDelay averageDelay =
+			// createWeightedDealyData(averageDelayPerMarket);
+			// averageWeightedDelayPerParameter.add(averageDelay);
 			handleAverageData(toBeAverage, max);
-			
+
 		}
 
 	}
+
 	private static void handleAverageData(List<List<FisherData>> toBeAverage, int max) {
 		List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
 		averageDataLast.add(calculateAverageLast(lastToBeAverage));
 		toBeAverage = fixAverage(toBeAverage, max);
 		List<FisherData> average = calculateAverage(toBeAverage, max);
 		averageData.addAll(average);
-		
+
 	}
 
 	/*
-	private static FisherDataDelay createWeightedDealyData(List<FisherDataDelay> averageDelayPerMarket) {
-		new
-		return null;
-	}
-	*/
+	 * private static FisherDataDelay createWeightedDealyData(List<FisherDataDelay>
+	 * averageDelayPerMarket) { new return null; }
+	 */
 
-	private static void handleData(List<FisherData> data, List<List<FisherData>> toBeAverage, List<FisherDataDelay> averageDelayPerMarket, 
-			Mailer mailer, Market market, int inputParameter) {
+	private static void handleData(List<FisherData> data, List<List<FisherData>> toBeAverage,
+			List<FisherDataDelay> averageDelayPerMarket, Mailer mailer, Market market, int inputParameter) {
 		toBeAverage.add(data);
 		allData.addAll(data);
-		allDataLast.add(data.get(data.size() - 1));		
-		handleDelayData(mailer,market, averageDelayPerMarket, inputParameter);
+		allDataLast.add(data.get(data.size() - 1));
+		handleDelayData(mailer, market, averageDelayPerMarket, inputParameter);
 	}
 
-	private static void handleDelayData(Mailer mailer, Market market, List<FisherDataDelay> averageDelayPerMarket, int inputParameter) {
+	private static void handleDelayData(Mailer mailer, Market market, List<FisherDataDelay> averageDelayPerMarket,
+			int inputParameter) {
 		List<Double> delays = mailer.getDelays();
 		int numberMessages = delays.size();
 		double averageDelay = calcAverage(delays);
-		FisherDataDelay fdDelay = new FisherDataDelay(market, distributionParameterString, distributionDelayString,inputParameter, averageDelay,numberMessages);
+		FisherDataDelay fdDelay = new FisherDataDelay(market, distributionParameterString, distributionDelayString,
+				inputParameter, averageDelay, numberMessages);
 		averageDelayPerMarket.add(fdDelay);
 
 	}
@@ -446,10 +498,6 @@ public class MainSimulator {
 				// System.out.println(market);
 			}
 
-			
-			
-			
-			
 			List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
 			averageDataLast.add(calculateAverageLast(lastToBeAverage));
 
@@ -498,7 +546,7 @@ public class MainSimulator {
 				for (int i = meanRepsStart; i < meanRepsEnd; i++) {
 					currRep = i;
 					restartRandomUtilAndType(s, b, i);
-					Market market = new Market(b, s, randomUtil, randomGoodTypes, i);
+					Market market = new Market(b, s, utilRandom, goodTypesRandom, i);
 					repsMarkets.add(market);
 				}
 				ans.add(repsMarkets);
@@ -508,11 +556,11 @@ public class MainSimulator {
 	}
 
 	private static void restartRandomUtilAndType(Integer s, Integer b, int i) {
-		randomUtil = new Random((b * 10) + (s * 100) + (i * 1000));
-		randomGoodTypes = new Random((b * 10) + (s * 100) + (i * 1000));
+		utilRandom = new Random((b * 10) + (s * 100) + (i * 1000));
+		goodTypesRandom = new Random((b * 10) + (s * 100) + (i * 1000));
 
 	}
-
+/*
 	public static double getRandomNorm(double type, Random r) {
 		double ans = stdUtil * r.nextGaussian() + muUtil * type;
 		do {
@@ -521,5 +569,5 @@ public class MainSimulator {
 
 		return ans;
 	}
-
+*/
 }

@@ -97,7 +97,7 @@ public class FisherData {
 		for (int aOther = 0; aOther < util.length; aOther++) {
 			if (aOther != aIsEnvy) {
 				double aOtherUtility = util[aOther];
-				if (aUtility+0.08 < aOtherUtility) {
+				if (aUtility+MainSimulator.epsilonEnvyFree < aOtherUtility) {
 					return false;
 				}
 			}

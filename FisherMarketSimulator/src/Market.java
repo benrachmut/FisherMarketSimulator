@@ -24,8 +24,16 @@ public class Market {
 		this.rGoodTypes = rGoodTypes;
 		this.goods = createGoods(goodsNum);
 		this.buyers = createBuyers(buyersNum);
+		
+		conncetGoodToBuyer();
 		this.R = createR();
 		this.parameterDelayMartix = new TreeMap<Integer, double[][]>();
+	}
+
+	private void conncetGoodToBuyer() {
+		for (Good good : goods) {
+			int counter = 0;
+		}
 	}
 
 	public int getId() {
@@ -132,6 +140,7 @@ public class Market {
 		return this.mailer;
 	}
 
+	/*
 	public void createParameterMatrix(int parameter, RandomNumberGenerator rng) {
 
 		double[][] value = new double[R.length][R[0].length];
@@ -143,7 +152,7 @@ public class Market {
 			Random r = new Random(id);
 
 			if (MainSimulator.simplisticDelay) {
-				//cvbcvbcv
+				cvbcvbcv
 				
 				
 				
@@ -161,6 +170,7 @@ public class Market {
 		this.parameterDelayMartix.put(parameter, value);
 
 	}
+	*/
 
 	private double[][] setParametersToZero() {
 		double[][] ans = new double[R.length][R[0].length];
