@@ -60,7 +60,7 @@ public class MainSimulator {
 	 * if sparse true constant delay present represents the velocity a message is
 	 * passed
 	 */
-	public static double[] delayConstants= { 5 };
+	public static double[] delayConstants = { 5 };
 	/*
 	 * Additionally for constant delay, The probability for line to have extra
 	 * latency caused by noise. false = no, true = yes delay. or buyers and goods
@@ -101,7 +101,7 @@ public class MainSimulator {
 	 * if buyer is cut of for number of iterations, parameter for withdrawing number
 	 * of iterations.
 	 */
-	public static int[] downNumIterParameters = { 0 };
+	public static double[] downNumIterParameters = { 0 };
 	/* Random variables */
 	public static Random downSparsityRand, downInfRand, downNumIterRand;
 
@@ -127,63 +127,70 @@ public class MainSimulator {
 			runCentralistic(markets);
 		} else {
 			setSparsityForMarkets(markets);
-			List<CommunicationProtocol> communicationProtocols= 
-					createCommunicationProtocols();
-			runDistributed(communicationProtocols ,markets);
+			List<CommunicationProtocol> communicationProtocols = createCommunicationProtocols();
+			runDistributed(communicationProtocols, markets);
 		}
 		createExcel();
 	}
 
 	private static List<CommunicationProtocol> createCommunicationProtocols() {
 		List<CommunicationProtocol> ans = new ArrayList<CommunicationProtocol>();
-		
-		
+
+		List<CommunicationProtocolDelay> cpDelays = createCPDelay();
+		List<CommunicationProtocolDown> cpDown = createCPDown();
+
+
+		for (CommunicationProtocolDelay delay : cpDelays) {
+			for (CommunicationProtocolDown down : cpDown) {
+				ans.add(new CommunicationProtocol(delay,down));
+			}
+		}
+
+		return ans;
+	}
+
+	private static List<CommunicationProtocolDown> createCPDown() {
+		List<CommunicationProtocolDown> ans =new ArrayList<CommunicationProtocolDown>();
+		for (double downSparsity : downSparsityProbs) {// set with market
+			if (downSparsity == 0) {
+				ans.add(new CommunicationProtocolDown());
+			}
+
+			else {
+				for (int downK : downKs) {
+					for (double downInf : downInfProbs) {
+						for (double downNumIterProb : downNumIterProbs) {
+							for (double downNumIterParameter : downNumIterParameters) {
+								ans.add(new CommunicationProtocolDown(downSparsity,downK,downInf,
+										downNumIterProb,downNumIterParameter, copySparsityProb));
+							}
+						} // downNumIterProb;
+					} // downInfProb
+				} // downK
+			} // else
+		} // downSparsity(
+		return ans;
+	}
+
+	private static List<CommunicationProtocolDelay> createCPDelay() {
+		List<CommunicationProtocolDelay> ans = new ArrayList<CommunicationProtocolDelay>();
 		CommunicationProtocolDelay cpDelay = null;
 		for (double dealyConstantSparsity : dealyConstantSparsityProbs) {// set with market
-			
 			if (dealyConstantSparsity == 0) {
-				cpDelay = new CommunicationProtocolDelay();
-			}
-			else {
-			for (double delayConstant : delayConstants) {
-				for (double dealyNoiseSparsity : dealyNoiseSparsityProbs) {// set with market
-					for (double mu : delayMuNoises) {
-						for (double std : delayStdNoises) {
-							cpDelay = new CommunicationProtocolDelay
-									(dealyConstantSparsity,delayConstant,
-											dealyNoiseSparsity,mu,std);
-						}//std
-					}//mu
-				}//dealyNoiseSparsity
-			}//delayConstant
-			} //else zero
-		} //dealyConstantSparsity
-		
-		
-		 
-		 
-		
-		
-		
-		
-		downSparsityProb // set with market
-		downK
-		downInfProb 
-		downNumIterProb;
-		downNumIterParameter
-		
-		
-		public static boolean considerDecisionCounter = true;
-		public static Random dealyConstantSparsityRand, dealyNoiseSparsityRand;
-		public static boolean copySparsityProb = false;// used in market
-	
-
-		
-		public static Random downSparsityRand, downInfRand, downNumIterRand;
-
-		
-		
-		
+				ans.add(new CommunicationProtocolDelay());
+			} else {
+				for (double delayConstant : delayConstants) {
+					for (double dealyNoiseSparsity : dealyNoiseSparsityProbs) {// set with market
+						for (double mu : delayMuNoises) {
+							for (double std : delayStdNoises) {
+								ans.add(new CommunicationProtocolDelay(dealyConstantSparsity, delayConstant,
+										dealyNoiseSparsity, mu, std, considerDecisionCounter));
+							} // std
+						} // mu
+					} // dealyNoiseSparsity
+				} // delayConstant
+			} // else zero
+		} // dealyConstantSparsity
 		return ans;
 	}
 
@@ -199,17 +206,17 @@ public class MainSimulator {
 		// dealyConstantSparsityProb, dealyNoiseSparsityProb, downSparsityProb
 		long[] seeds = composeSeeds(market);
 
-		for (double p : dealyConstantSparsityProb) {
+		for (double p : dealyConstantSparsityProbs) {
 			dealyConstantSparsityRand = new Random(seeds[0]);
 			market.setDealyConstantSparsity(p, dealyConstantSparsityRand);
 		}
-		
-		for (double p : dealyNoiseSparsityProb) {
+
+		for (double p : dealyNoiseSparsityProbs) {
 			dealyNoiseSparsityRand = new Random(seeds[1]);
 			market.setDealyNoiseSparsity(p, dealyNoiseSparsityRand);
 		}
-		
-		for (double p : downSparsityProb) {
+
+		for (double p : downSparsityProbs) {
 			downSparsityRand = new Random(seeds[2]);
 			market.setDownSparsityRand(p, downSparsityRand);
 		}
@@ -503,23 +510,28 @@ public class MainSimulator {
 	 * j++) { ans[i][j] = rutil[i][j].getUtility(1); } } return ans; }
 	 */
 
-	private static void runDistributed(List<List<Market>> markets) {
+	private static void runDistributed(List<CommunicationProtocol> communicationProtocols, List<List<Market>> markets) {
 
 		for (List<Market> marketReps : markets) {
-			runDifferentCommunicationOnMarketReps(marketReps);
+			runDifferentCommunicationOnMarketReps(communicationProtocols,marketReps);
 		}
 
 	}
 
-	private static void runDifferentCommunicationOnMarketReps(List<Market> marketReps) {
+	private static void runDifferentCommunicationOnMarketReps(List<CommunicationProtocol> communicationProtocols, List<Market> marketReps) {
 
-		for (int parameter : distributionParameters) {
+		
+		
+		for (CommunicationProtocol cp : communicationProtocols) {
 			int max = 0;
 			List<List<FisherData>> toBeAverage = new ArrayList<List<FisherData>>();
 			List<FisherDataDelay> averageDelayPerMarket = new ArrayList<FisherDataDelay>();
 
 			for (Market market : marketReps) {
-				Mailer mailer = updateMarket(market, parameter);
+				Mailer mailer = updateMarket(market, cp);
+				
+				
+				
 				List<FisherData> data = runFisher(market);
 				max = updateMaxIteration(max, data.size());
 				handleData(data, toBeAverage, averageDelayPerMarket, mailer, market, parameter);
@@ -572,10 +584,10 @@ public class MainSimulator {
 		return f.algorithm();
 	}
 
-	private static Mailer updateMarket(Market market, int parameter) {
-		double[][] parameterMatrix = market.getParametersMatrix(parameter);
-		Mailer mailer = new Mailer(distributionDelayType, parameter, parameterMatrix);
-		market.restartMarketBetweenRuns(mailer, parameter);
+	private static Mailer updateMarket(Market market, CommunicationProtocol cp) {
+		//double[][] parameterMatrix = market.getParametersMatrix(parameter);
+		Mailer mailer = new Mailer(cp);
+		market.restartMarketBetweenRuns(mailer);
 		return mailer;
 	}
 
@@ -658,6 +670,4 @@ public class MainSimulator {
 
 	}
 
-	
-	
 }

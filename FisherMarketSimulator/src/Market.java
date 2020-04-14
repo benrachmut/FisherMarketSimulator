@@ -117,7 +117,7 @@ public class Market {
 	public void restartMarketBetweenRuns(Mailer mailer, int parameter) {
 
 		// updateMailer(mailer, parameter);
-		this.currentParameter = parameter;
+		//this.currentParameter = parameter;
 		this.mailer = mailer;
 
 		for (Good g : this.goods) {
@@ -129,7 +129,10 @@ public class Market {
 			b.updateMailer(this.mailer);
 			b.resetBuyerBetweenRuns();
 		}
+		
+		fixMatrixAccordingToMailerInfo
 
+		restartSeeds
 	}
 
 	private void updateMailer(Mailer mailer, int parameter) {
