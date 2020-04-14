@@ -10,31 +10,37 @@ public class MainSimulator {
 
 	public static boolean printForDebug = false;
 	public static boolean envyDebug = true;
-	
-	//-------------MARKET PARAMETERS-------------
-	/*run the algorithm synchronous or asynchronous*/
+
+	// -------------MARKET PARAMETERS-------------
+	/* run the algorithm synchronous or asynchronous */
 	public static boolean central = true;
-	/*delta of converges*/
+	/* delta of converges */
 	protected static final double THRESHOLD = 1E-10;
-	/*parameters for withdrawing utilities 
-	 *maybe change to actual calculating withdrawing parameters*/
+	/*
+	 * parameters for withdrawing utilities maybe change to actual calculating
+	 * withdrawing parameters
+	 */
 	public static double stdUtil = 100;
 	public static double muUtil = 100;
 	public static int numberTypes = 4;
-	/*market size*/
+	/* market size */
 	public static int[] buyers = { 6 };
 	public static int[] goods = { 9 };
-	/*number of trials, start and ends*/
+	/* number of trials, start and ends */
 	public static int meanRepsStart = 0;
 	public static int meanRepsEnd = 1;
-	/*if algorithm does not converge what is the upper bound
-	 *avoid inf loop*/
+	/*
+	 * if algorithm does not converge what is the upper bound avoid inf loop
+	 */
 	public static int maxIteration = 1000000;
-	/*Random variables*/
-	public static Random utilRandom,goodTypesRandom;
-	/* sometimes agent is envy just a little and algo needs to continue alot until it changes */
+	/* Random variables */
+	public static Random utilRandom, goodTypesRandom;
+	/*
+	 * sometimes agent is envy just a little and algo needs to continue alot until
+	 * it changes
+	 */
 	public static double epsilonEnvyFree = 0.05;
-	
+
 	// public static int distributionParameterType = 1; // 1 = uniform, 2 = exp
 	// public static int distributionDelayType = 1;// 1 = uniform, 2 = exפ
 	// public static String distributionParameterString;
@@ -42,95 +48,186 @@ public class MainSimulator {
 	// public static boolean simplisticDelay = true;
 	// public static int[] distributionParameters = { 0, 25, 50, 200, 500 };
 
-	
-	//-------------DELAY PARAMETERS-------------
-	 /* probability for communication to have atlist constant delays, with it create
-	 * matrix of buyers and goods, false = no delay at all, true = constant delay.
-	 * Note a buyer that holds a good causes for value in matrix to be false
-	 * regardless of probability withdrawn.*/
-	public static double[] dealyConstantSparsityProb = { 1 };// set with market
-	/*if sparse true constant delay present represents the velocity a message is passed*/ 
-	public static double[] delayConstant = { 5 };
-	 /* probability for communication to have noise in addition to the constant, 
-	 * with it create matrix of buyers and goods, 
-	 * false = no noise additionally to constant, 
-	 * true = noise additionally to constant. If dcsp the value for dnsp will be false as well. 
-	 * Therefore for buyers and goods actually to have noise is the 
-	 * Multiplication between dnsp and 1-dcsp.*/
-	public static double[] dealyNoiseSparsityProb = { 1 };// set with market
-	/*if sparse true for noise of delay is withdrawn from normal distribution*/ 
-	public static double[] delayMuNoise = { 10 };
-	public static double[] delayStdNoise = { 3 };
-	/* do we ignore messages that where overlapped?*/
-	public static boolean considerDecisionCounter = true;
-	/*Random variables*/
-	public static Random dealyConstantSparsityRand,dealyNoiseSparsityRand;
-	
-	
-	
-	//-------------DOWN PARAMETERS-------------
-	/*should csp be withdrawn or copied from dcsp*/
-	public static boolean copySparsityProb = false;// used in market
-	/*probability for communication to be blocked between buyers and goods, 
-	 * with it create matrix of buyers and goods or not
-	 * , false = no blocks, true = block may be created. 
-	 * Note a buyer that holds a good causes for value in matrix to be false 
-	 * regardless of probability withdrawn.*/
-	public static double[] downSparsityProb = { 0 };// set with market
-	/* counter for possible block each k computation*/
-	public static int[] downK = { 5 };
-	/*probability for a buyer to be completely cut completely. 
-	 If buyer holds a good, the good is also cut off.*/
-	public static double[] downInfProb = { 0 };
-	/*if buyer is not completely cut of, probability for a buyer 
-	 * to be cut of for a number of iterations.*/
-	public static double[] downNumIterProb = { 0 };
-	/*if buyer is cut of for number of iterations, 
-	 * parameter for withdrawing number of iterations.*/ 
-	public static int[] downNumIterParameter = { 0 };
-	/*Random variables*/
-	public static Random downSparsityRandom,downInfRandom,downNumIterRandom;
+	// -------------DELAY PARAMETERS-------------
 
-	
-	
-	//-------------Lists for data printing-------------
+	/*
+	 * The probability for line to have constant delay between them. false = no,
+	 * true = yes delay. Note a buyer that holds a good causes for value in matrix
+	 * to be false regardless of probability withdrawn.
+	 */
+	public static double[] dealyConstantSparsityProbs = { 1 };// set with market
+	/*
+	 * if sparse true constant delay present represents the velocity a message is
+	 * passed
+	 */
+	public static double[] delayConstants= { 5 };
+	/*
+	 * Additionally for constant delay, The probability for line to have extra
+	 * latency caused by noise. false = no, true = yes delay. or buyers and goods
+	 * actually to have noise is the Multiplication between dnsp and dcsp.
+	 */
+	public static double[] dealyNoiseSparsityProbs = { 1 };// set with market
+	/* if sparse true for noise of delay is withdrawn from normal distribution */
+	public static double[] delayMuNoises = { 10 };
+	public static double[] delayStdNoises = { 3 };
+	/* do we ignore messages that where overlapped? */
+	public static boolean considerDecisionCounter = true;
+	/* Random variables */
+	public static Random dealyConstantSparsityRand, dealyNoiseSparsityRand;
+
+	// -------------DOWN PARAMETERS-------------
+	/* should csp be withdrawn or copied from dcsp */
+	public static boolean copySparsityProb = false;// used in market
+	/*
+	 * probability for communication to be blocked between buyers and goods, with it
+	 * create matrix of buyers and goods or not , false = no blocks, true = block
+	 * may be created. Note a buyer that holds a good causes for value in matrix to
+	 * be false regardless of probability withdrawn.
+	 */
+	public static double[] downSparsityProbs = { 0 };// set with market
+	/* counter for possible block each k computation */
+	public static int[] downKs = { 5 };
+	/*
+	 * probability for a buyer to be completely cut completely. If buyer holds a
+	 * good, the good is also cut off.
+	 */
+	public static double[] downInfProbs = { 0 };
+	/*
+	 * if buyer is not completely cut of, probability for a buyer to be cut of for a
+	 * number of iterations.
+	 */
+	public static double[] downNumIterProbs = { 0 };
+	/*
+	 * if buyer is cut of for number of iterations, parameter for withdrawing number
+	 * of iterations.
+	 */
+	public static int[] downNumIterParameters = { 0 };
+	/* Random variables */
+	public static Random downSparsityRand, downInfRand, downNumIterRand;
+
+	// -------------Lists for data printing-------------
 	private static List<FisherData> allData = new ArrayList<FisherData>();
 	private static List<FisherData> averageData = new ArrayList<FisherData>();
 	private static List<FisherData> allDataLast = new ArrayList<FisherData>();
 	private static List<FisherData> averageDataLast = new ArrayList<FisherData>();
 
-	//-------------for code use-------------
+	// -------------for code use-------------
 	public static int currRep;
 	public static int currBuyersNum;
 	public static int currGoodsNum;
 	public static int currParameter;
-
-	
 
 	public static void main(String[] args) {
 
 		// handleDistributions();
 
 		List<List<Market>> markets = createMarkets();
-		
+
 		if (central) {
 			runCentralistic(markets);
 		} else {
 			setSparsityForMarkets(markets);
-			runDistributed(markets);
+			List<CommunicationProtocol> communicationProtocols= 
+					createCommunicationProtocols();
+			runDistributed(communicationProtocols ,markets);
 		}
 		createExcel();
 	}
 
+	private static List<CommunicationProtocol> createCommunicationProtocols() {
+		List<CommunicationProtocol> ans = new ArrayList<CommunicationProtocol>();
+		
+		
+		CommunicationProtocolDelay cpDelay = null;
+		for (double dealyConstantSparsity : dealyConstantSparsityProbs) {// set with market
+			
+			if (dealyConstantSparsity == 0) {
+				cpDelay = new CommunicationProtocolDelay();
+			}
+			else {
+			for (double delayConstant : delayConstants) {
+				for (double dealyNoiseSparsity : dealyNoiseSparsityProbs) {// set with market
+					for (double mu : delayMuNoises) {
+						for (double std : delayStdNoises) {
+							cpDelay = new CommunicationProtocolDelay
+									(dealyConstantSparsity,delayConstant,
+											dealyNoiseSparsity,mu,std);
+						}//std
+					}//mu
+				}//dealyNoiseSparsity
+			}//delayConstant
+			} //else zero
+		} //dealyConstantSparsity
+		
+		
+		 
+		 
+		
+		
+		
+		
+		downSparsityProb // set with market
+		downK
+		downInfProb 
+		downNumIterProb;
+		downNumIterParameter
+		
+		
+		public static boolean considerDecisionCounter = true;
+		public static Random dealyConstantSparsityRand, dealyNoiseSparsityRand;
+		public static boolean copySparsityProb = false;// used in market
+	
+
+		
+		public static Random downSparsityRand, downInfRand, downNumIterRand;
+
+		
+		
+		
+		return ans;
+	}
+
 	private static void setSparsityForMarkets(List<List<Market>> markets) {
-		//dealyConstantSparsityProb, dealyNoiseSparsityProb, downSparsityProb
 		for (List<Market> list : markets) {
 			for (Market market : list) {
 				setSparsityPerSingleMarket(market);
 			}
 		}
+	}
+
+	private static void setSparsityPerSingleMarket(Market market) {
+		// dealyConstantSparsityProb, dealyNoiseSparsityProb, downSparsityProb
+		long[] seeds = composeSeeds(market);
+
+		for (double p : dealyConstantSparsityProb) {
+			dealyConstantSparsityRand = new Random(seeds[0]);
+			market.setDealyConstantSparsity(p, dealyConstantSparsityRand);
+		}
 		
+		for (double p : dealyNoiseSparsityProb) {
+			dealyNoiseSparsityRand = new Random(seeds[1]);
+			market.setDealyNoiseSparsity(p, dealyNoiseSparsityRand);
+		}
 		
+		for (double p : downSparsityProb) {
+			downSparsityRand = new Random(seeds[2]);
+			market.setDownSparsityRand(p, downSparsityRand);
+		}
+
+	}
+
+	private static long[] composeSeeds(Market market) {
+		long[] ans = new long[3];
+
+		int id = market.getId();
+		int numBuyers = market.getBuyers().size();
+		int numGoods = market.getGoods().size();
+
+		ans[0] = id * 1000 + numBuyers * 100 + numGoods * 10;
+		ans[1] = numBuyers * 1000 + id * 100 + numGoods * 10;
+		ans[2] = numGoods * 1000 + numBuyers * 100 + id * 10;
+
+		return ans;
 	}
 
 	/*
@@ -560,14 +657,7 @@ public class MainSimulator {
 		goodTypesRandom = new Random((b * 10) + (s * 100) + (i * 1000));
 
 	}
-/*
-	public static double getRandomNorm(double type, Random r) {
-		double ans = stdUtil * r.nextGaussian() + muUtil * type;
-		do {
-			ans = stdUtil * r.nextGaussian() + muUtil * type;
-		} while (ans < 0);
 
-		return ans;
-	}
-*/
+	
+	
 }

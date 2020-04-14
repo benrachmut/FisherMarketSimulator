@@ -2,8 +2,11 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 
 public class Good implements Messageable, Comparable<Good> {
 
@@ -15,10 +18,17 @@ public class Good implements Messageable, Comparable<Good> {
 	private SortedMap<Buyer, Message> messageRecived;
 	private double goodChange;
 	private SortedMap<Buyer, Double> allocation;
-
+	private Buyer assignedBuyer;
+	
 	public Good(int type, int i) {
 		this.type = type;
 		this.id = i;
+	}
+	
+
+	
+	public void setAssignedBuyer(Buyer b) {
+		assignedBuyer = b;
 	}
 
 	@Override
@@ -193,5 +203,22 @@ public class Good implements Messageable, Comparable<Good> {
 	public double getPrice() {
 		// TODO Auto-generated method stub
 		return this.calculatePrice();
+	}
+
+
+
+	public Buyer getBuyerHost() {
+		return assignedBuyer;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Good) {
+			return this.id== ((Good)obj).getId();
+		}
+		else {
+			return false;
+		}
+	
 	}
 }

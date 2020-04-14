@@ -3,7 +3,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.Random;
 import java.util.SortedMap;
+import java.util.SortedSet;
 import java.util.TreeMap;
+import java.util.TreeSet;
 import java.util.Vector;
 import java.util.Map.Entry;
 
@@ -19,12 +21,22 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 	private SortedMap<Good, Double> bidsMap;
 	private SortedMap<Good, Double> updatedUtilitiesMap;
 	//private HashMap<Good, Utility> utilitiesMap;
-	
+	private SortedSet<Good> goodsResponsibility;
+
 	
 	public Buyer(int i, List<Good> goods, Random r) {
 		this.id=i;
 		this.randomUtil = r;
 		this.utilitiesMap = createUtils(goods);
+		this.goodsResponsibility=new TreeSet<Good>();
+
+	}
+	public int getGoodsResponsibilitySize() {
+		return goodsResponsibility.size();
+	}
+	
+	public boolean addToGoodsResponsibility(Good g) {
+		return goodsResponsibility.add(g);
 	}
 
 
@@ -218,6 +230,19 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 		return this.updatedUtilitiesMap;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Buyer) {
+			return this.id == ((Buyer)obj).getId();
+		}
+		else {
+			return false;
+		}
+	
+	}
+	
+	
+	
 /*
 	public Map<Good, Double> getAllocation() {
 		Map<Good, Double> ans = new HashMap<Good, Double>();
