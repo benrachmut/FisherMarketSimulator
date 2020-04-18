@@ -9,20 +9,17 @@ import java.util.TreeMap;
 
 public class FisherSolverDistributed extends FisherSolver {
 
-	private Mailer mailer;
+	private MailerZZZZ mailer;
 	private List<Good> goods;
 	private List<Buyer> buyers;
 	private Double[][] allocation;
 
 	public FisherSolverDistributed(Market m) {
 		super(m);
-		this.mailer = m.getMailer();
 		this.goods = m.getGoods();
 		this.buyers = m.getBuyers();
-		/*
-		 * for (Good g : this.goods) { g.resetGoodsBetweenRuns(); } for (Buyer b :
-		 * this.buyers) { b.resetBuyerBetweenRuns(); }
-		 */
+		this.algorithm();
+		
 	}
 
 	private Double[][] createCentralisticAllocation() {
@@ -52,7 +49,7 @@ public class FisherSolverDistributed extends FisherSolver {
 		return ans;
 	}
 
-	public FisherData iterate() {
+	public Double[][] iterate() {
 		//System.out.println("______" + iterations + "______");
 		//mailer.printMailBox();
 		
@@ -60,8 +57,8 @@ public class FisherSolverDistributed extends FisherSolver {
 		sendMessages(msgToSend);
 		this.allocation = createCentralisticAllocation();
 		updateChange();
-		FisherData ans = new FisherDataDistributed(this.allocation, this.R, this.iterations, this.market, this.mailer);
-		return ans;
+		//FisherData ans = new FisherDataDistributed(this.allocation, this.R, this.iterations, this.market, this.mailer);
+		return this.allocation;
 	}
 
 	private void sendMessages(List<Message> msgToSend) {
@@ -119,7 +116,7 @@ public class FisherSolverDistributed extends FisherSolver {
 		}
 		return ans;
 	}
-
+/*
 	private void printMsgsToSend(List<Message> msgToSend) {
 		int count = 0;
 		for (Message message : msgToSend) {
@@ -129,7 +126,7 @@ public class FisherSolverDistributed extends FisherSolver {
 		}
 
 	}
-
+*/
 	private void updateChange() {
 		double ans = 0.0;
 		for (Good g : this.goods) {
@@ -143,14 +140,15 @@ public class FisherSolverDistributed extends FisherSolver {
 		this.change = ans;
 
 	}
-
+/*
 	private void updateStability() {
 		this.change = 0;
 		for (Good t : goods) {
 			this.change = this.change + t.getGoodChanges();
 		}
 	}
-
+*/
+	/*
 	private void sendMessages(Map<Messageable, List<Message>> receiversMap) {
 		for (Entry<Messageable, List<Message>> e : receiversMap.entrySet()) {
 			Messageable reciever = e.getKey();
@@ -158,7 +156,9 @@ public class FisherSolverDistributed extends FisherSolver {
 			reciever.recieveMessage(msgsRecieved);
 		}
 	}
+*/
 
+	/*
 	private Map<Messageable, List<Message>> createReciversMap(List<Message> msgToSend) {
 		Map<Messageable, List<Message>> ans = new HashMap<Messageable, List<Message>>();
 		for (Message m : msgToSend) {
@@ -171,7 +171,7 @@ public class FisherSolverDistributed extends FisherSolver {
 		}
 		return ans;
 	}
-
+*/
 	// next iteration: calculates prices, calculates current valuation and
 	// update the bids
 

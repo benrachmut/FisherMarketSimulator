@@ -22,6 +22,7 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 	private SortedMap<Good, Double> updatedUtilitiesMap;
 	//private HashMap<Good, Utility> utilitiesMap;
 	private SortedSet<Good> goodsResponsibility;
+	private boolean withTimeStamp;
 
 	
 	public Buyer(int i, List<Good> goods, Random r) {
@@ -29,8 +30,8 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 		this.randomUtil = r;
 		this.utilitiesMap = createUtils(goods);
 		this.goodsResponsibility=new TreeSet<Good>();
-
 	}
+
 	public int getGoodsResponsibilitySize() {
 		return goodsResponsibility.size();
 	}
@@ -46,7 +47,7 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 			Good g = goods.get(j);	
 			int goodId = g.getId();
 			int goodType = g.getType();
-			double value =MainSimulator.getRandomNorm(goodType, randomUtil);
+			double value =MainSimulator.getRandomNormUtil(goodType, randomUtil);
 			Utility util = new UtilityLinear(this,g,value);
 			ans.put(g, util);
 		}
@@ -71,9 +72,9 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 	@Override
 	public void updateMailer(Mailer mailer) {
 		this.mailer=mailer;
-		
+		this.withTimeStamp = mailer.isWithTimeStamp();
 	}
-	
+
 	
 	
 	public void resetBuyerBetweenRuns() {
@@ -85,6 +86,8 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 
 	private void initMapsInVariables() {
 		this.decisionCounter= 0;
+		withTimeStamp = false;
+		
 		this.messageRecived = new TreeMap<Good, Message>();
 		this.bidsMap = new TreeMap<Good, Double>();
 		//this.utilitiesMap = new HashMap<Good, Utility>();
@@ -143,7 +146,7 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 			checkIfBug(sender);
 			Good t = (Good)sender;
 
-			if (!ignoreMessage || !MainSimulator.considerDecisionCounter) {		
+			if (!ignoreMessage || !withTimeStamp) {		
 				this.messageRecived.put(t, m);
 				double allocation  = m.getContext();
 				Utility u = utilitiesMap.get(t);
@@ -240,6 +243,7 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 		}
 	
 	}
+
 	
 	
 	

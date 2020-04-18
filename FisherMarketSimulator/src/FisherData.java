@@ -5,12 +5,15 @@ public class FisherData {
 	protected int numByuers;
 	protected int numGoods;
 	protected double iteration;
-	protected Double sumRX;
-	protected double envyFree;
+	
+	
 	protected String algo;
 	protected boolean considerDecisionCounter;
 	protected int maxIteration;
 
+	
+
+	
 	public FisherData(Double[][] X, Utility[][] rUtil, double iterations, Market market, String algo) {
 
 		this.id = market.getId();
@@ -20,91 +23,17 @@ public class FisherData {
 		Double[][] R = turnUtilToDouble(rUtil);
 		this.algo = algo;
 		maxIteration = MainSimulator.maxIteration;
-		// this.sumR = sumMatrix(R);
-		// this.sumX = sumMatrix(X);
-		this.sumRX = createRX(R, X);
-		this.envyFree = checkEnvyFree(X, rUtil);
+		//this.sumRX = createRX(R, X);
+		//this.envyFree = checkEnvyFree(X, rUtil);
 	}
 
-	private static int checkEnvyFree(Double[][] x, Utility[][] r) {
-		if (MainSimulator.envyDebug) {
-			printX(x);
-			printR(r);
-		}
 
-		for (int a = 0; a < r.length; a++) {
 
-			double[] calcUtility = new double[r.length];
-			for (int aWantSwitch = 0; aWantSwitch < x.length; aWantSwitch++) {
-				double u = 0;
-				for (int good = 0; good < x[aWantSwitch].length; good++) {
-					if (x[aWantSwitch][good] != null) {
-						double calc = r[a][good].getUtility(x[aWantSwitch][good]);
-						u = u + calc;
-					}
-				} // good
-				calcUtility[aWantSwitch] = u;
-			} // aWantSwitch
+	
 
-			if (checkEnvyFreeOfAgent(calcUtility, a) == false) {
-				return 0;
-			}
+	
 
-		} // is a envy?
-		return 1;
-	}
-
-	private static void printR(Utility[][] input) {
-		System.out.println("Matrix R:");
-
-		double[][] r = new double[input.length][input[0].length];
-		for (int i = 0; i < r.length; i++) {
-			for (int j = 0; j < r[i].length; j++) {
-				r[i][j] = input[i][j].getUtility(1);
-			}
-		}
-		FisherSolver.print2DArray(r);
-
-	}
-
-	private static void printX(Double[][] input) {
-		System.out.println("Matrix X:");
-		double[][] x = new double[input.length][input[0].length];
-
-		for (int i = 0; i < x.length; i++) {
-			for (int j = 0; j < x[i].length; j++) {
-				if (input[i][j] != null) {
-					x[i][j] = input[i][j];
-				} else {
-					x[i][j] = 0;
-				}
-			}
-		}
-		FisherSolver.print2DArray(x);
-	}
-
-	private static boolean checkEnvyFreeOfAgent(double[] util, int aIsEnvy) {
-
-		if (MainSimulator.envyDebug) {
-			System.out.println("a" + aIsEnvy + " utility view is:");
-			for (int i = 0; i < util.length; i++) {
-				System.out.print("[a" + i + ":" + util[i]+"]");
-			}
-			System.out.println();
-		}
-
-		double aUtility = util[aIsEnvy];
-		for (int aOther = 0; aOther < util.length; aOther++) {
-			if (aOther != aIsEnvy) {
-				double aOtherUtility = util[aOther];
-				if (aUtility+MainSimulator.epsilonEnvyFree < aOtherUtility) {
-					return false;
-				}
-			}
-		}
-		return true;
-	}
-
+/*
 	@Override
 	public String toString() {
 		String ans = this.id + "," + this.numByuers + "," + this.numGoods + "," + this.iteration + "," + this.algo + ","
@@ -114,7 +43,8 @@ public class FisherData {
 				this.sumRX + "," + this.envyFree;
 		return ans;
 	}
-
+*/
+	
 	public FisherData(FisherData copiedFisherData, double iterationOfCopied) {
 
 		this.id = copiedFisherData.getId();
@@ -161,18 +91,7 @@ public class FisherData {
 		return new String(this.algo);
 	}
 
-	public static Double createRX(Double[][] r, Double[][] x) {
-		Double ans = 0.0;
-		for (int i = 0; i < r.length; i++) {
-			for (int j = 0; j < r[i].length; j++) {
-				if (x[i][j] != null && r[i][j] != null) {
-					ans = ans + r[i][j] * x[i][j];
-				}
-			}
-		}
-
-		return ans;
-	}
+	
 	/*
 	 * private Double sumMatrix(Double[][] input) { Double ans = 0.0; for (int i =
 	 * 0; i < input.length; i++) { for (int j = 0; j < input[i].length; j++) { if

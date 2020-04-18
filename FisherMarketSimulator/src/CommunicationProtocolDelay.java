@@ -6,8 +6,7 @@ public class CommunicationProtocolDelay {
 	delayConstant,dealyNoiseSparsity,
 	mu,std;
 	private boolean perfectCommunication, timeStamp;
-	
-	private Random dealyNormRand;
+	private Random dealyNormRand, dealyConstantSparsityRand, dealyNoiseSparsityRand;
 	
 	public CommunicationProtocolDelay() {
 		perfectCommunication = true;
@@ -26,8 +25,14 @@ public class CommunicationProtocolDelay {
 	
 	}
 	
-	public void setSeed(long seed) {
-		dealyNormRand =  new Random(seed);
+	public void setSeed(long marketId) {
+		long seed1 = marketId*1000+ (int)(dealyConstantSparsity*100)+ (int)(delayConstant*10);
+		long seed2 = marketId*1000+ (int)(mu*100)+ (int)(std *10);
+		long seed3 = marketId*1000+ (int)(dealyNoiseSparsity*100)+ (int)(mu*10);
+
+		dealyNormRand =  new Random(seed1);
+		dealyConstantSparsityRand = new Random(seed2);
+		dealyNoiseSparsityRand= new Random(seed3);
 	}
 	
 	
@@ -56,62 +61,30 @@ public class CommunicationProtocolDelay {
 		return ans;
 	}
 
+	public boolean isPerfectCommunication() {
+		return this.perfectCommunication;
+	}
+
 	public double getDealyConstantSparsity() {
-		return dealyConstantSparsity;
+		return this.dealyConstantSparsity;
 	}
 
-	public void setDealyConstantSparsity(double dealyConstantSparsity) {
-		this.dealyConstantSparsity = dealyConstantSparsity;
-	}
-
-	public double getDelayConstant() {
-		return delayConstant;
-	}
-
-	public void setDelayConstant(double delayConstant) {
-		this.delayConstant = delayConstant;
+	public Random getDelayConstantSparsityRand() {
+		return this.dealyConstantSparsityRand;
 	}
 
 	public double getDealyNoiseSparsity() {
-		return dealyNoiseSparsity;
+		return this.dealyNoiseSparsity;
 	}
 
-	public void setDealyNoiseSparsity(double dealyNoiseSparsity) {
-		this.dealyNoiseSparsity = dealyNoiseSparsity;
+	public Random getDelayNoiseSparsityRand() {
+		return this.dealyNoiseSparsityRand;
 	}
 
-	public double getMu() {
-		return mu;
-	}
-
-	public void setMu(double mu) {
-		this.mu = mu;
-	}
-
-	public double getStd() {
-		return std;
-	}
-
-	public void setStd(double std) {
-		this.std = std;
-	}
-
-	public boolean isPerfectCommunication() {
-		return perfectCommunication;
-	}
-
-	public void setPerfectCommunication(boolean perfectCommunication) {
-		this.perfectCommunication = perfectCommunication;
-	}
-
-	public boolean isTimeStamp() {
+	public boolean isWithTimeStamp() {
+		// TODO Auto-generated method stub
 		return timeStamp;
 	}
-
-	public void setTimeStamp(boolean timeStamp) {
-		this.timeStamp = timeStamp;
-	}
-	
 	
 	
 	

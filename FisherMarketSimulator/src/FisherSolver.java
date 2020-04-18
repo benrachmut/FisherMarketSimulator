@@ -1,27 +1,135 @@
 import java.util.ArrayList;
 import java.util.List;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 public abstract class FisherSolver {
 
 	protected Market market;
-	protected int iterations;
+	protected int iteration;
 	protected double change;
 	protected Utility[][] R;
-	private Double[][] utilsAsNumber;
-
-	protected List<FisherData> data;
-	protected int parameter;
-
-	public FisherSolver(Market m) {
+	private Double[][] r;
+	//protected List<FisherData> data;
+	protected double sumRX;
+	protected double envyFree;
+	
+	protected SortedMap<Integer, Double> cumulativeRX;
+	protected SortedMap<Integer, Double> cumulativeEnvyFree;
+	protected List<String> performanceList;
+	
+	private Double[][] x;
+	private int maxIteration;
+	private double threshold;
+	
+	public FisherSolver(Market m, int maxIteration, double threshold) {
 		this.market = m;
-		this.parameter = m.getCurrentParameter();
+		//this.parameter = m.getCurrentParameter();
 		this.R = m.getR();
-		this.utilsAsNumber = createUtilsAsNumbers();
-		this.iterations = 0;
+		this.r = createUtilsAsNumbers();
+		this.iteration = 0;
 		this.change = Double.MAX_VALUE;
-		this.data = new ArrayList<FisherData>();
+		
+		this.cumulativeRX =new TreeMap<Integer, Double> ();
+		this.cumulativeEnvyFree=new TreeMap<Integer, Double> ();
+		
+		this.maxIteration = maxIteration;
+		this.threshold = threshold;
+		
+		//this.data = new ArrayList<FisherData>();
 	}
 
+	public  Double createRX() {
+		Double ans = 0.0;
+		for (int i = 0; i < r.length; i++) {
+			for (int j = 0; j < r[i].length; j++) {
+				if (x[i][j] != null && r[i][j] != null) {
+					ans = ans + r[i][j] * x[i][j];
+				}
+			}
+		}
+
+		return ans;
+	}
+	private static void printR(Utility[][] input) {
+		System.out.println("Matrix R:");
+
+		double[][] r = new double[input.length][input[0].length];
+		for (int i = 0; i < r.length; i++) {
+			for (int j = 0; j < r[i].length; j++) {
+				r[i][j] = input[i][j].getUtility(1);
+			}
+		}
+		FisherSolver.print2DArray(r);
+
+	}
+	private static void printX(Double[][] input) {
+		System.out.println("Matrix X:");
+		double[][] x = new double[input.length][input[0].length];
+
+		for (int i = 0; i < x.length; i++) {
+			for (int j = 0; j < x[i].length; j++) {
+				if (input[i][j] != null) {
+					x[i][j] = input[i][j];
+				} else {
+					x[i][j] = 0;
+				}
+			}
+		}
+		print2DArray(x);
+	}
+	
+	private  int checkEnvyFree() {
+		if (MainSimulator.envyDebug) {
+			printX(x);
+			printR(R);
+		}
+
+		for (int a = 0; a < R.length; a++) {
+
+			double[] calcUtility = new double[R.length];
+			for (int aWantSwitch = 0; aWantSwitch < x.length; aWantSwitch++) {
+				double u = 0;
+				for (int good = 0; good < x[aWantSwitch].length; good++) {
+					if (x[aWantSwitch][good] != null) {
+						double calc = R[a][good].getUtility(x[aWantSwitch][good]);
+						u = u + calc;
+					}
+				} // good
+				calcUtility[aWantSwitch] = u;
+			} // aWantSwitch
+
+			if (checkEnvyFreeOfAgent(calcUtility, a) == false) {
+				return 0;
+			}
+
+		} // is a envy?
+		return 1;
+	}
+
+	private static boolean checkEnvyFreeOfAgent(double[] util, int aIsEnvy) {
+
+		if (MainSimulator.envyDebug) {
+			System.out.println("a" + aIsEnvy + " utility view is:");
+			for (int i = 0; i < util.length; i++) {
+				System.out.print("[a" + i + ":" + util[i]+"]");
+			}
+			System.out.println();
+		}
+
+		double aUtility = util[aIsEnvy];
+		for (int aOther = 0; aOther < util.length; aOther++) {
+			if (aOther != aIsEnvy) {
+				double aOtherUtility = util[aOther];
+				if (aUtility+MainSimulator.epsilonEnvyFree < aOtherUtility) {
+					return false;
+				}
+			}
+		}
+		return true;
+	}
+	
+	
 	private Double[][] createUtilsAsNumbers() {
 		Double[][] ans = new Double[R.length][R[0].length];
 		for (int i = 0; i < ans.length; i++) {
@@ -32,7 +140,7 @@ public abstract class FisherSolver {
 		return ans;
 	}
 
-	public List<FisherData> algorithm() {
+	public void algorithm() {
 /*
 		if (MainSimulator.central) {
 			System.out.println("central status after initialization");
@@ -40,7 +148,8 @@ public abstract class FisherSolver {
 			printStatues();
 		}
 */
-		data.add(iterate());
+		x = iterate();
+		updateInfo();
 /*
 		if (!MainSimulator.central) {
 			System.out.println("distributed status after initialization");
@@ -51,14 +160,32 @@ public abstract class FisherSolver {
 		}
 */
 		while (!isStable()) {
-			
-			this.iterations = this.iterations + 1;
-			data.add(iterate());
+			this.iteration = this.iteration + 1;
+			this.x = iterate();
+			updateInfo();
 			printStatues();
 		}	
-		return this.data;
 	}
 
+	private void updateInfo() {
+		this.sumRX= this.createRX();
+		this.envyFree = (double)this.checkEnvyFree();
+		
+		this.cumulativeEnvyFree.put(iteration, envyFree);
+		this.cumulativeRX.put(iteration, sumRX);
+		this.performanceList.add(this.toString());
+		
+	}
+
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return this.market+","+ this.maxIteration +","+ this.threshold  +"," +iteration+","+sumRX+","+envyFree;
+	}
+	
+	public static String header() {
+		return 	"MaxIteration"+","+"Threshold"+","+"Iteration"+","+"Sum RX"+","+"Envy Free";
+	}
 	private void printStatues() {
 		if (MainSimulator.printForDebug) {
 
@@ -67,7 +194,7 @@ public abstract class FisherSolver {
 				printStatuesSeq();
 				
 			} else {
-				if (this.iterations % 2 == 0) {
+				if (this.iteration % 2 == 0) {
 					printStatuesSeq();
 
 				}
@@ -76,7 +203,7 @@ public abstract class FisherSolver {
 	}
 
 	private void printStatuesSeq() {
-		System.out.println("______iterations = " + this.iterations + "______");
+		System.out.println("______iterations = " + this.iteration + "______");
 		System.out.println();
 		printBuyerReactionToAllocation();
 		printGoodReactionToBid();
@@ -129,7 +256,7 @@ public abstract class FisherSolver {
 		System.out.println();
 
 		System.out.println("XijRij:");
-		System.out.println(FisherData.createRX(utilsAsNumber, turnToDouble(allocation)));
+		System.out.println(createRX());
 		System.out.println();
 	}
 
@@ -156,11 +283,11 @@ public abstract class FisherSolver {
 
 	protected abstract double[] getPricers();
 
-	public abstract FisherData iterate();
+	public abstract Double[][]iterate();
 
 	public boolean isStable() {
 		boolean isStable = change < MainSimulator.THRESHOLD;
-		boolean isComplete = this.iterations == MainSimulator.maxIteration;
+		boolean isComplete = this.iteration == MainSimulator.maxIteration;
 		return isComplete||isStable;
 	}
 

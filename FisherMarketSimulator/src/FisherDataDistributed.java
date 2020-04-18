@@ -6,7 +6,7 @@ public class FisherDataDistributed extends FisherData {
 	private String distributionDelay;
 	private String distributionParameter;
 
-	public FisherDataDistributed(Double[][] allocation, Utility[][] r, int iterations, Market market, Mailer mailer) {
+	public FisherDataDistributed(Double[][] allocation, Utility[][] r, int iterations, Market market, MailerZZZZ mailer) {
 		super(allocation,r,iterations,market, "distributed");
 		
 		considerDecisionCounter = MainSimulator.considerDecisionCounter;

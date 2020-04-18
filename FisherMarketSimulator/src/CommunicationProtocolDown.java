@@ -4,8 +4,9 @@ public class CommunicationProtocolDown {
 	private double downSparsity;
 	private int downK;
 	private double downInf, downNumIterProb,downNumIterParameter;
-	private boolean copySparsityProb;
-	private Random downInfRand, downNumIterRand;
+	private boolean copySparsityProb, perfectFitNeverDown;
+	
+	private Random downInfRand, downNumIterRand,downSparsityRand;
 	
 	public CommunicationProtocolDown(double downSparsity, int downK, double downInf, double downNumIterProb,
 			double downNumIterParameter, boolean copySparsityProb) {
@@ -16,15 +17,22 @@ public class CommunicationProtocolDown {
 		this.downNumIterProb = downNumIterProb;
 		this.downNumIterParameter = downNumIterParameter;
 		this.copySparsityProb = copySparsityProb;
+		this.perfectFitNeverDown = false;
 	}
 	
 	public CommunicationProtocolDown() {
-		// TODO Auto-generated constructor stub
+		perfectFitNeverDown = true;
 	}
 	
-	public void setSeed(long seed) {
-		downInfRand = new Random(seed); 
-		downNumIterRand= new Random(seed);
+	public void setSeed(long marketId) {
+		
+		long seed1 = marketId*10000+ (int)(downSparsity*1000)+ (int)(downNumIterParameter*100);
+		long seed2 = marketId*10000+ (int)(downInf*1000)+ (int)(downInf*100);
+		long seed3 = marketId*10000+ (int)(downNumIterProb*1000)+ (int)(downK*100);
+
+		downInfRand = new Random(seed1); 
+		downNumIterRand= new Random(seed2);
+		downSparsityRand = new Random(seed3);
 	}
 	
 	
@@ -58,52 +66,21 @@ public class CommunicationProtocolDown {
 		return ans;
 	}
 
-	public double getDownSparsity() {
-		return downSparsity;
+
+	public boolean isPerfectFitNeverDown() {
+		return this.perfectFitNeverDown;
 	}
 
-	public void setDownSparsity(double downSparsity) {
-		this.downSparsity = downSparsity;
+	public double downSparseProb() {
+		return this.downSparsity;
+	}
+	public Random downSparseRand() {
+		return this.downSparsityRand;
 	}
 
-	public int getDownK() {
-		return downK;
-	}
-
-	public void setDownK(int downK) {
-		this.downK = downK;
-	}
-
-	public double getDownInf() {
-		return downInf;
-	}
-
-	public void setDownInf(double downInf) {
-		this.downInf = downInf;
-	}
-
-	public double getDownNumIterProb() {
-		return downNumIterProb;
-	}
-
-	public void setDownNumIterProb(double downNumIterProb) {
-		this.downNumIterProb = downNumIterProb;
-	}
-
-	public double getDownNumIterParameter() {
-		return downNumIterParameter;
-	}
-
-	public void setDownNumIterParameter(double downNumIterParameter) {
-		this.downNumIterParameter = downNumIterParameter;
-	}
-
-	public boolean isCopySparsityProb() {
-		return copySparsityProb;
-	}
-
-	public void setCopySparsityProb(boolean copySparsityProb) {
-		this.copySparsityProb = copySparsityProb;
+	public boolean isCopyFromConstantSparse() {
+		// TODO Auto-generated method stub
+		return this.copySparsityProb;
 	}
 	
 	

@@ -11,31 +11,31 @@ public class Market {
 	private int id;
 	private List<Buyer> buyers;
 	private List<Good> goods;
-	private Random rUtil;
-	private Random rGoodTypes;
+	private Random rUtil, rGoodTypes;
 	private Utility[][] R;
+	// private Mailer mailer;
+
+	private boolean[][] dealyConstantSparsity;
+	private boolean[][] dealyNoiseSparsity;
+	private boolean[][] downSparsity;
 	private Mailer mailer;
-	private SortedMap<Double, boolean[][]> dealyConstantSparsityMap;
-	private SortedMap<Double, boolean[][]> dealyNoiseSparsityMap;
-	private SortedMap<Double, boolean[][]> downSparsityMap;
 
-	// dealyConstantSparsityProb, dealyNoiseSparsityProb, downSparsityProb
+	// private int currentParameter;
 
-	private int currentParameter;
-
-	public Market(int buyersNum, int goodsNum, Random rUtil, Random rGoodTypes, int i) {
+	public Market(int buyersNum, int goodsNum, int i) {
 		this.id = i;
-		this.rUtil = rUtil;
-		this.rGoodTypes = rGoodTypes;
+
+		rUtil = new Random((buyersNum * 10) + (goodsNum * 100) + (i * 1000));
+		rGoodTypes = new Random((buyersNum * 100) + (goodsNum * 10) + (i * 1000));
+
 		this.goods = createGoods(goodsNum);
 		this.buyers = createBuyers(buyersNum);
 
 		conncetGoodToBuyer();
 		this.R = createR();
-
-		dealyConstantSparsityMap = new TreeMap<Double, boolean[][]>();
-		dealyNoiseSparsityMap = new TreeMap<Double, boolean[][]>();
-		downSparsityMap = new TreeMap<Double, boolean[][]>();
+		dealyConstantSparsity = new boolean[buyersNum][goodsNum];
+		dealyNoiseSparsity = new boolean[buyersNum][goodsNum];
+		downSparsity = new boolean[buyersNum][goodsNum];
 	}
 
 	private void conncetGoodToBuyer() {
@@ -65,7 +65,6 @@ public class Market {
 
 	private Utility[][] createR() {
 		Utility[][] ans = new Utility[buyers.size()][goods.size()];
-
 		for (int i = 0; i < buyers.size(); i++) {
 			Buyer b = buyers.get(i);
 			for (int j = 0; j < goods.size(); j++) {
@@ -78,12 +77,17 @@ public class Market {
 
 	@Override
 	public String toString() {
-		String ans = "Market number: " + id + ", " + "buyers: " + buyers.size() + ", goods: " + goods.size()
-				+ ", parameter: " + this.currentParameter;
-
+		String ans = id + ","+ buyers.size() + ","+ goods.size(); 
+		if (this.mailer!=null) {
+			ans=ans+","+mailer.toString();
+		}
 		return ans;
 	}
 
+	
+	public static String header() {
+		return "id" + ","+ "buyers"+ ","+ "goods"; 
+	}
 	private List<Buyer> createBuyers(int buyersNum) {
 		List<Buyer> ans = new ArrayList<Buyer>();
 
@@ -113,38 +117,16 @@ public class Market {
 
 		return type;
 	}
-
-	public void restartMarketBetweenRuns(Mailer mailer, int parameter) {
-
-		// updateMailer(mailer, parameter);
-		//this.currentParameter = parameter;
-		this.mailer = mailer;
-
-		for (Good g : this.goods) {
-			g.updateMailer(this.mailer);
-			g.resetGoodsBetweenRuns();
-		}
-
-		for (Buyer b : this.buyers) {
-			b.updateMailer(this.mailer);
-			b.resetBuyerBetweenRuns();
-		}
-		
-		fixMatrixAccordingToMailerInfo
-
-		restartSeeds
-	}
-
-	private void updateMailer(Mailer mailer, int parameter) {
-		this.currentParameter = parameter;
-		this.mailer = mailer;
-		double[][] parameterMatrix = this.parameterDelayMartix.get(parameter);
-		this.mailer.setParameterMatrix(parameterMatrix);
-		this.mailer.emptyMessageBox();
-		this.mailer.updateSeeds(this.id, parameter);
-		this.mailer.updateParameter(parameter);
-
-	}
+	/*
+	 * private void updateMailer(Mailer mailer, int parameter) {
+	 * this.currentParameter = parameter; this.mailer = mailer; double[][]
+	 * parameterMatrix = this.parameterDelayMartix.get(parameter);
+	 * this.mailer.setParameterMatrix(parameterMatrix);
+	 * this.mailer.emptyMessageBox(); this.mailer.updateSeeds(this.id, parameter);
+	 * this.mailer.updateParameter(parameter);
+	 * 
+	 * }
+	 */
 
 	public Utility[][] getR() {
 		// TODO Auto-generated method stub
@@ -160,11 +142,10 @@ public class Market {
 		// TODO Auto-generated method stub
 		return this.goods;
 	}
-
-	public Mailer getMailer() {
-		// TODO Auto-generated method stub
-		return this.mailer;
-	}
+	/*
+	 * public Mailer getMailer() { // TODO Auto-generated method stub return
+	 * this.mailer; }
+	 */
 
 	/*
 	 * public void createParameterMatrix(int parameter, RandomNumberGenerator rng) {
@@ -189,74 +170,117 @@ public class Market {
 	 * 
 	 * }
 	 */
+	/*
+	 * private double[][] setParametersToZero() { double[][] ans = new
+	 * double[R.length][R[0].length]; for (int i = 0; i < R.length; i++) { for (int
+	 * j = 0; j < R[i].length; j++) { ans[i][j] = 0; } } return ans; }
+	 */
+	/*
+	 * public int getCurrentParameter() { return currentParameter; }
+	 */
 
-	private double[][] setParametersToZero() {
-		double[][] ans = new double[R.length][R[0].length];
-		for (int i = 0; i < R.length; i++) {
-			for (int j = 0; j < R[i].length; j++) {
-				ans[i][j] = 0;
+	public void meetMailer(Mailer mailer) {
+
+		this.mailer = mailer;
+		for (Good g : this.goods) {
+			g.updateMailer(this.mailer);
+			g.resetGoodsBetweenRuns();
+		}
+
+		for (Buyer b : this.buyers) {
+			b.updateMailer(this.mailer);
+			b.resetBuyerBetweenRuns();
+		}
+		createBooleanMarix();
+
+	}
+
+	private void createBooleanMarix() {
+
+		if (this.mailer.isPerfectCommunication() == false) {
+			this.dealyConstantSparsity = initDelaySparseConstantMatrix();
+			this.dealyNoiseSparsity = initDelaySparseNoiseMatrix();
+		} else {
+			this.dealyConstantSparsity = new boolean[buyers.size()][goods.size()];
+			this.dealyNoiseSparsity = new boolean[buyers.size()][goods.size()];
+		}
+
+		if (this.mailer.perfectFitNeverDown() == false) {
+			this.downSparsity = initDownSparseMatrix();
+		} else {
+			this.downSparsity = new boolean[buyers.size()][goods.size()];
+		}
+
+	}
+
+	private boolean[][] initDownSparseMatrix() {
+		boolean[][] ans = new boolean[buyers.size()][goods.size()];
+		double p = mailer.getDownSparseProb();
+		Random r = mailer.getDownSparseRand();
+
+		boolean isCopyFromConstant = mailer.isCopyFromConstantSparse();
+		for (int i = 0; i < ans.length; i++) {
+			for (int j = 0; j < ans[i].length; j++) {
+				double rnd = r.nextDouble();
+				if (isCopyFromConstant) {
+					ans[i][j] = this.dealyConstantSparsity[i][j];
+				} else {
+					if (rnd < p) {
+						ans[i][j] = true;
+					}
+				}
+			}
+		}
+		return ans;
+
+	}
+
+	private boolean[][] initDelaySparseNoiseMatrix() {
+		boolean[][] ans = new boolean[buyers.size()][goods.size()];
+		double p = this.mailer.getDealyNoiseSparsityProb();
+		Random r = this.mailer.getDelayNoiseSparsityRand();
+
+		for (int i = 0; i < ans.length; i++) {
+			for (int j = 0; j < ans[i].length; j++) {
+				double rnd = r.nextDouble();
+				boolean flag = false;
+
+				if (rnd < p) {
+					ans[i][j] = true;
+					flag = true;
+				}
+				if (this.dealyConstantSparsity[i][j] == false || flag == false) {
+					ans[i][j] = false;
+				}
+
 			}
 		}
 		return ans;
 	}
 
-	public int getCurrentParameter() {
-		return currentParameter;
-	}
-
-	/*
-	 * public double[][] getParametersMatrix(int parameter) { this.currentParameter
-	 * = parameter; return this.parameterDelayMartix.get(parameter); }
-	 */
-	public void setDealyConstantSparsity(double p, Random r) {
-		boolean[][] ans = initSparseMatrix(p,r); 
-		this.dealyConstantSparsityMap.put(p,ans);
-	}
-	
-	public void setDealyNoiseSparsity(double p, Random r) {
-		boolean[][] ans = initSparseMatrix(p,r); 
-		this.dealyNoiseSparsityMap.put(p,ans);
-	}
-	
-	public void setDownSparsityRand(double p, Random r) {
-		boolean[][] ans = initSparseMatrix(p,r); 
-		this.downSparsityMap.put(p,ans);
-	}
-	
-	private boolean[][] initSparseMatrix(double p, Random r) {
+	private boolean[][] initDelaySparseConstantMatrix() {
 		boolean[][] ans = new boolean[buyers.size()][goods.size()];
+		double p = this.mailer.getDealyConstantSparsityProb();
+		Random r = this.mailer.getDelayConstantSparsityRand();
+
 		for (int i = 0; i < ans.length; i++) {
 			for (int j = 0; j < ans[i].length; j++) {
 				double rnd = r.nextDouble();
 				boolean isBuyerHostingGood = goods.get(j).getBuyerHost().equals(buyers.get(i));
-				
-				boolean flag =false;
-				
-				if (rnd<p ) {
+
+				boolean flag = false;
+
+				if (rnd < p) {
 					ans[i][j] = true;
-					flag=true;
+					flag = true;
 				}
-				if (isBuyerHostingGood) {
-					ans[i][j] = false;
-					flag=true;
-				}
-				if (flag ==false) {
+				if (isBuyerHostingGood || flag == false) {
 					ans[i][j] = false;
 				}
-				
-				else {
-					ans[i][j] = true;
-				}
+
 			}
 		}
 		return ans;
 	}
-
-	
-	
-
-	
-
-	
 
 }

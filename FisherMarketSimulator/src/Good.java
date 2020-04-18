@@ -19,6 +19,7 @@ public class Good implements Messageable, Comparable<Good> {
 	private double goodChange;
 	private SortedMap<Buyer, Double> allocation;
 	private Buyer assignedBuyer;
+	private boolean withTimeStamp;
 	
 	public Good(int type, int i) {
 		this.type = type;
@@ -48,6 +49,7 @@ public class Good implements Messageable, Comparable<Good> {
 	@Override
 	public void updateMailer(Mailer mailer) {
 		this.mailer = mailer;
+		this.withTimeStamp = mailer.isWithTimeStamp();
 
 	}
 
@@ -153,7 +155,7 @@ public class Good implements Messageable, Comparable<Good> {
 			Messageable sender = m.getSender();
 			Buyer p = (Buyer) sender;
 
-			if (!ignoreMessage || !MainSimulator.considerDecisionCounter) {
+			if (!ignoreMessage || !withTimeStamp) {
 				this.messageRecived.put(p, m);
 				double bid = m.getContext();
 				this.bidsRecieved.put(p, bid);
