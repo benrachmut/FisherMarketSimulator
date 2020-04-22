@@ -2,12 +2,15 @@ package Communication;
 import java.util.Random;
 
 public class ProtocolDown {
+	
+	/*
 	private double downSparsity;
 	private int downK;
 	private double downInf, downNumIterProb,downNumIterParameter;
 	private boolean copySparsityProb, perfectFitNeverDown;
 	
-	private Random downInfRand, downNumIterRand,downSparsityRand;
+	
+	//private Random downInfRand, downNumIterRand,downSparsityRand;
 	
 	public ProtocolDown(double downSparsity, int downK, double downInf, double downNumIterProb,
 			double downNumIterParameter, boolean copySparsityProb) {
@@ -20,6 +23,7 @@ public class ProtocolDown {
 		this.copySparsityProb = copySparsityProb;
 		this.perfectFitNeverDown = false;
 	}
+	
 	
 	public ProtocolDown() {
 		perfectFitNeverDown = true;
@@ -83,7 +87,7 @@ public class ProtocolDown {
 		// TODO Auto-generated method stub
 		return this.copySparsityProb;
 	}
-	
+	*/
 	
 	
 	
