@@ -1,10 +1,15 @@
+package Market;
+
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import com.sun.org.apache.bcel.internal.generic.RETURN;
+
+import Utility.Utility;
 
 public class Market {
 
@@ -13,14 +18,12 @@ public class Market {
 	private List<Good> goods;
 	private Random rUtil, rGoodTypes;
 	private Utility[][] R;
-	// private Mailer mailer;
 
-	private boolean[][] dealyConstantSparsity;
-	private boolean[][] dealyNoiseSparsity;
-	private boolean[][] downSparsity;
 	private Mailer mailer;
 
-	// private int currentParameter;
+	private int[][] imperfectCommunicationMatrix;
+
+
 
 	public Market(int buyersNum, int goodsNum, int i) {
 		this.id = i;
@@ -32,10 +35,24 @@ public class Market {
 		this.buyers = createBuyers(buyersNum);
 
 		conncetGoodToBuyer();
+		createImperfectCommunicationMatrix();
 		this.R = createR();
-		dealyConstantSparsity = new boolean[buyersNum][goodsNum];
-		dealyNoiseSparsity = new boolean[buyersNum][goodsNum];
-		downSparsity = new boolean[buyersNum][goodsNum];
+	}
+
+	private void createImperfectCommunicationMatrix() {
+		this.imperfectCommunicationMatrix = new int[this.buyers.size()][this.goods.size()];
+		for (int i = 0; i < imperfectCommunicationMatrix.length; i++) {
+			Buyer b = buyers.get(i);
+			List<Integer> goodsResIndexes= b.getGoodsResponsibilityIndexes();
+			for (int j = 0; j < imperfectCommunicationMatrix[i].length; j++) {
+				if (goodsResIndexes.contains(j)) {
+					imperfectCommunicationMatrix[i][j] = 0;
+				}else {
+					imperfectCommunicationMatrix[i][j]=1;
+				}
+			}
+		}
+
 	}
 
 	private void conncetGoodToBuyer() {
@@ -77,17 +94,17 @@ public class Market {
 
 	@Override
 	public String toString() {
-		String ans = id + ","+ buyers.size() + ","+ goods.size(); 
-		if (this.mailer!=null) {
-			ans=ans+","+mailer.toString();
+		String ans = id + "," + buyers.size() + "," + goods.size();
+		if (this.mailer != null) {
+			ans = ans + "," + mailer.toString();
 		}
 		return ans;
 	}
 
-	
 	public static String header() {
-		return "id" + ","+ "buyers"+ ","+ "goods"; 
+		return "id" + "," + "buyers" + "," + "goods";
 	}
+
 	private List<Buyer> createBuyers(int buyersNum) {
 		List<Buyer> ans = new ArrayList<Buyer>();
 
@@ -142,10 +159,34 @@ public class Market {
 		// TODO Auto-generated method stub
 		return this.goods;
 	}
+	
+	public void meetMailer(Mailer mailer) {
+
+		this.mailer = mailer;
+		for (Good g : this.goods) {
+			g.updateMailer(this.mailer);
+			g.resetGoodsBetweenRuns();
+		}
+
+		for (Buyer b : this.buyers) {
+			b.updateMailer(this.mailer);
+			b.resetBuyerBetweenRuns();
+		}
+		//createBooleanMarix();
+
+	}
+	
+	public int[][] getImperfectCommunicationMatrix() {
+		// TODO Auto-generated method stub
+		return this.imperfectCommunicationMatrix;
+	}
+	
 	/*
 	 * public Mailer getMailer() { // TODO Auto-generated method stub return
 	 * this.mailer; }
 	 */
+
+
 
 	/*
 	 * public void createParameterMatrix(int parameter, RandomNumberGenerator rng) {
@@ -179,22 +220,8 @@ public class Market {
 	 * public int getCurrentParameter() { return currentParameter; }
 	 */
 
-	public void meetMailer(Mailer mailer) {
-
-		this.mailer = mailer;
-		for (Good g : this.goods) {
-			g.updateMailer(this.mailer);
-			g.resetGoodsBetweenRuns();
-		}
-
-		for (Buyer b : this.buyers) {
-			b.updateMailer(this.mailer);
-			b.resetBuyerBetweenRuns();
-		}
-		createBooleanMarix();
-
-	}
-
+	
+/*
 	private void createBooleanMarix() {
 
 		if (this.mailer.isPerfectCommunication() == false) {
@@ -212,7 +239,9 @@ public class Market {
 		}
 
 	}
-
+*/
+	
+	/*
 	private boolean[][] initDownSparseMatrix() {
 		boolean[][] ans = new boolean[buyers.size()][goods.size()];
 		double p = mailer.getDownSparseProb();
@@ -234,7 +263,8 @@ public class Market {
 		return ans;
 
 	}
-
+	*/
+/*
 	private boolean[][] initDelaySparseNoiseMatrix() {
 		boolean[][] ans = new boolean[buyers.size()][goods.size()];
 		double p = this.mailer.getDealyNoiseSparsityProb();
@@ -257,7 +287,9 @@ public class Market {
 		}
 		return ans;
 	}
-
+*/
+	
+	/*
 	private boolean[][] initDelaySparseConstantMatrix() {
 		boolean[][] ans = new boolean[buyers.size()][goods.size()];
 		double p = this.mailer.getDealyConstantSparsityProb();
@@ -282,5 +314,6 @@ public class Market {
 		}
 		return ans;
 	}
+	*/
 
 }

@@ -1,6 +1,7 @@
+package Communication;
 import java.util.Random;
 
-public class CommunicationProtocolDown {
+public class ProtocolDown {
 	private double downSparsity;
 	private int downK;
 	private double downInf, downNumIterProb,downNumIterParameter;
@@ -8,7 +9,7 @@ public class CommunicationProtocolDown {
 	
 	private Random downInfRand, downNumIterRand,downSparsityRand;
 	
-	public CommunicationProtocolDown(double downSparsity, int downK, double downInf, double downNumIterProb,
+	public ProtocolDown(double downSparsity, int downK, double downInf, double downNumIterProb,
 			double downNumIterParameter, boolean copySparsityProb) {
 		super();
 		this.downSparsity = downSparsity;
@@ -20,7 +21,7 @@ public class CommunicationProtocolDown {
 		this.perfectFitNeverDown = false;
 	}
 	
-	public CommunicationProtocolDown() {
+	public ProtocolDown() {
 		perfectFitNeverDown = true;
 	}
 	

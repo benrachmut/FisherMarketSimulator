@@ -40,7 +40,7 @@ import java.util.Random;
  *
  */
 public enum RandomNumberGenerator {	
-	
+
 	Poisson {
 		@Override
 		public double getRandom(Random r, double lambda) {

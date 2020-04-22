@@ -1,4 +1,6 @@
- 
+package Utility;
+import Market.Buyer;
+import Market.Good;
 
 public class UtilityConcave extends UtilityLinear {
 	static public double ro;

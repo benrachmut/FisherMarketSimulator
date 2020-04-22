@@ -1,3 +1,7 @@
+package Fisher;
+import Market.MainSimulator;
+import Market.Market;
+import Utility.Utility;
 
 public class FisherSolverCentralistic extends FisherSolver {
 

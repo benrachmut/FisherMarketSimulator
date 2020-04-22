@@ -1,6 +1,6 @@
-
-
-
+package Utility;
+import Market.Buyer;
+import Market.Good;
 
 public abstract class Utility {
 

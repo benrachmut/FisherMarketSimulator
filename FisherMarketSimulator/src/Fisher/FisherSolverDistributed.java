@@ -1,21 +1,30 @@
+package Fisher;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+
+import Communication.Message;
+import Communication.Messageable;
+import Market.Buyer;
+import Market.Good;
+import Market.Mailer;
+import Market.Market;
+
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 public class FisherSolverDistributed extends FisherSolver {
 
-	private MailerZZZZ mailer;
+	private Mailer mailer;
 	private List<Good> goods;
 	private List<Buyer> buyers;
 	private Double[][] allocation;
 
-	public FisherSolverDistributed(Market m) {
-		super(m);
+	public FisherSolverDistributed(Market m, int maxIteration, double threshold) {
+		super(m, maxIteration, threshold);
 		this.goods = m.getGoods();
 		this.buyers = m.getBuyers();
 		this.algorithm();

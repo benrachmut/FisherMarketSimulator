@@ -1,17 +1,25 @@
+package Market;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
+import Communication.CommunicationProtocolDelay;
+import Communication.ProtocolDown;
+import Communication.Message;
+import Communication.Messageable;
+import Communication.ProtocolDelay;
+
 public class Mailer {
 	
-	private CommunicationProtocolDelay delay;
-	private CommunicationProtocolDown down;
+	private ProtocolDelay delay;
+	private ProtocolDown down;
 	private List<Message> messageBox;
+	private int[][] impCommmunicationMatrix;
 	
 
-	public Mailer(CommunicationProtocolDelay delay, CommunicationProtocolDown down) {
+	public Mailer(ProtocolDelay delay, ProtocolDown down) {
 		super();
 		this.delay = delay;
 		this.down = down;
@@ -19,10 +27,11 @@ public class Mailer {
 
 	}
 	
-	public void setSeeds(long marketId) {
-		emptyMessageBox();
-		this.delay.setSeed(marketId);
-		this.down.setSeed(marketId);
+	public void resetMailer(int marketId, int[][]impComMatrix) {
+		this.messageBox = new ArrayList<Message>();
+		this.impCommmunicationMatrix = impComMatrix;
+		this.delay.setSeeds(marketId);
+		this.down.setSeeds(marketId);
 	}
 	
 	@Override
@@ -30,11 +39,12 @@ public class Mailer {
 		return delay.toString()+","+down.toString();
 	}
 	public static String header(){
-		return CommunicationProtocolDelay.header()+","+CommunicationProtocolDown.header();
+		return CommunicationProtocolDelay.header()+","+ProtocolDown.header();
 	}
 	
 	
 	public void createMessage(Messageable sender, int decisionCounter, Messageable reciever, double context) {
+		
 		int buyerId, goodId;
 		if (sender instanceof Buyer) {
 			buyerId = sender.getId();
@@ -43,10 +53,18 @@ public class Mailer {
 			buyerId = reciever.getId();
 			goodId = sender.getId();
 		}
-
-		int delay = createDelay(buyerId, goodId);
-		Message m = new Message(sender, decisionCounter, reciever, context, delay);
-		this.messageBox.add(m);
+	
+		
+		int q_ij =  this.impCommmunicationMatrix[buyerId][goodId];
+		double p_ij = 1.0;
+		try {
+			Integer randomDelay = delay.createDelay(q_ij,p_ij);
+			Message m = new Message(sender, decisionCounter, reciever, context, randomDelay);
+			this.messageBox.add(m);
+		} catch (NullPointerException e) {
+			// TODO: handle exception
+		}
+		
 	}
 	
 	public List<Message> handleDelay() {
@@ -66,10 +84,7 @@ public class Mailer {
 		return msgToSend;
 	}
 
-	private void emptyMessageBox() {
-		this.messageBox = new ArrayList<Message>();
-
-	}
+	
 	
 	public void printMailBox() {
 		for (int i = 0; i < this.messageBox.size(); i++) {
@@ -82,7 +97,7 @@ public class Mailer {
 		return this.delays;
 	}
 	*/
-
+/*
 	public boolean isPerfectCommunication() {
 		// TODO Auto-generated method stub
 		return this.delay.isPerfectCommunication();
@@ -130,6 +145,6 @@ public class Mailer {
 		return this.delay.isWithTimeStamp();
 	}
 	
-	
+	*/
 	
 }

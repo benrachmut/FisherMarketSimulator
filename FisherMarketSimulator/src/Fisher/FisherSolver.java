@@ -1,7 +1,12 @@
+package Fisher;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.SortedMap;
 import java.util.TreeMap;
+
+import Market.MainSimulator;
+import Market.Market;
+import Utility.Utility;
 
 public abstract class FisherSolver {
 
@@ -163,14 +168,13 @@ public abstract class FisherSolver {
 			this.iteration = this.iteration + 1;
 			this.x = iterate();
 			updateInfo();
-			printStatues();
+			//printStatues();
 		}	
 	}
 
 	private void updateInfo() {
 		this.sumRX= this.createRX();
 		this.envyFree = (double)this.checkEnvyFree();
-		
 		this.cumulativeEnvyFree.put(iteration, envyFree);
 		this.cumulativeRX.put(iteration, sumRX);
 		this.performanceList.add(this.toString());
@@ -286,7 +290,7 @@ public abstract class FisherSolver {
 	public abstract Double[][]iterate();
 
 	public boolean isStable() {
-		boolean isStable = change < MainSimulator.THRESHOLD;
+		boolean isStable = change < this.threshold;
 		boolean isComplete = this.iteration == MainSimulator.maxIteration;
 		return isComplete||isStable;
 	}

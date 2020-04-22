@@ -1,3 +1,5 @@
+package Market;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -8,6 +10,11 @@ import java.util.TreeMap;
 import java.util.TreeSet;
 import java.util.Vector;
 import java.util.Map.Entry;
+
+import Communication.Message;
+import Communication.Messageable;
+import Utility.Utility;
+import Utility.UtilityLinear;
 
 
 public class Buyer implements Messageable , Comparable<Buyer> {
@@ -242,6 +249,16 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 			return false;
 		}
 	
+	}
+
+	public List<Integer> getGoodsResponsibilityIndexes() {
+		List<Integer>ans = new ArrayList<Integer>();
+		
+		for (Good g : goodsResponsibility) {
+			ans.add(g.getId());
+		}
+		
+		return ans;
 	}
 
 	

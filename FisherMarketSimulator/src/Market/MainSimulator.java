@@ -1,11 +1,24 @@
+package Market;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.security.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.Random;
+
+import Communication.CommunicationProtocolDelay;
+import Communication.ProtocolDown;
+import Fisher.FisherData;
+import Fisher.FisherDataCentralistic;
+import Fisher.FisherDataDelay;
+import Fisher.FisherDataDistributed;
+import Fisher.FisherSolver;
+import Fisher.FisherSolverDistributed;
 
 public class MainSimulator {
 
@@ -33,7 +46,7 @@ public class MainSimulator {
 	/*
 	 * if algorithm does not converge what is the upper bound avoid inf loop
 	 */
-	public static int maxIteration = 1000000;
+	public static int maxIteration = 10000;
 	/* Random variables */
 	//public static Random utilRandom, goodTypesRandom;
 	/*
@@ -50,62 +63,37 @@ public class MainSimulator {
 	// public static int[] distributionParameters = { 0, 25, 50, 200, 500 };
 
 	// -------------DELAY PARAMETERS-------------
-
-	/*
-	 * The probability for line to have constant delay between them. false = no,
-	 * true = yes delay. Note a buyer that holds a good causes for value in matrix
-	 * to be false regardless of probability withdrawn.
-	 */
+/*
 	public static double[] dealyConstantSparsityProbs = { 1 };// set with market
-	/*
-	 * if sparse true constant delay present represents the velocity a message is
-	 * passed
-	 */
 	public static double[] delayConstants = { 5 };
-	/*
-	 * Additionally for constant delay, The probability for line to have extra
-	 * latency caused by noise. false = no, true = yes delay. or buyers and goods
-	 * actually to have noise is the Multiplication between dnsp and dcsp.
-	 */
 	public static double[] dealyNoiseSparsityProbs = { 1 };// set with market
-	/* if sparse true for noise of delay is withdrawn from normal distribution */
 	public static double[] delayMuNoises = { 10 };
 	public static double[] delayStdNoises = { 3 };
-	/* do we ignore messages that where overlapped? */
 	public static boolean[] withTimeStamps = {true,false};
-	/* Random variables */
+*/
 	//public static Random dealyConstantSparsityRand, dealyNoiseSparsityRand;
 
 	// -------------DOWN PARAMETERS-------------
 	/* should csp be withdrawn or copied from dcsp */
+/*
 	public static boolean copySparsityProb = false;// used in market
-	/*
-	 * probability for communication to be blocked between buyers and goods, with it
-	 * create matrix of buyers and goods or not , false = no blocks, true = block
-	 * may be created. Note a buyer that holds a good causes for value in matrix to
-	 * be false regardless of probability withdrawn.
-	 */
 	public static double[] downSparsityProbs = { 0 };// set with market
-	/* counter for possible block each k computation */
 	public static int[] downKs = { 5 };
-	/*
-	 * probability for a buyer to be completely cut completely. If buyer holds a
-	 * good, the good is also cut off.
-	 */
 	public static double[] downInfProbs = { 0 };
-	/*
-	 * if buyer is not completely cut of, probability for a buyer to be cut of for a
-	 * number of iterations.
-	 */
-	public static double[] downNumIterProbs = { 0 };
-	/*
-	 * if buyer is cut of for number of iterations, parameter for withdrawing number
-	 * of iterations.
-	 */
+	public static double[] downNumIterProbs = { 0 };	
 	public static double[] downNumIterParameters = { 0 };
-	
+*/
 
-	static List<List<FisherSolver>>fisherSolvers = new ArrayList<List<FisherSolver>>();
+	public static Map<Mailer,List<FisherSolver>>fisherSolvers = 
+			new HashMap<Mailer,List<FisherSolver>>();
+	
+	public static List<String>rawData;
+	public static List<String>avgData;
+	
+	
+	public static List<String>rawLast;
+	public static List<String>avgLast;
+
 	
 	public static void main(String[] args) {
 
@@ -113,21 +101,67 @@ public class MainSimulator {
 		List<Market> markets = createMarkets();
 		List<Mailer> mailers = createCommunicationProtocols();
 		
-		for (Mailer mailer : mailers) {
-			List<FisherSolver>list = new ArrayList<FisherSolver>();
-			for (Market market : markets) {
-				mailer.setSeeds(market.getId());
-				market.meetMailer(mailer);
-				FisherSolver fs = new FisherSolverDistributed(market);
-				list.add(fs);
-			}
-			fisherSolvers.add(list);
+		for (Mailer singleMailer : mailers) {
+			iterateMailerOverAllMarkets(singleMailer,markets);
 		}
+		createData();
+		
+		
 		createExcel();
 	}
 
 
+	
 
+
+	private static void iterateMailerOverAllMarkets(Mailer mailer, List<Market> markets) {
+		List<FisherSolver>list = new ArrayList<FisherSolver>();
+		for (Market market : markets) {
+			mailer.resetMailer(market.getId(),market.getImperfectCommunicationMatrix());
+			market.meetMailer(mailer);
+			FisherSolver fs = new FisherSolverDistributed(market, maxIteration, THRESHOLD);
+			list.add(fs);
+		}	
+		fisherSolvers.put(mailer,list);
+	}
+
+
+	private static void createData() {
+		createRawData();
+		createAvgData();
+		createRawDataLast();
+		createAvgDataLast();
+
+		
+		
+	}
+	
+	
+	private static void createRawData() {
+		
+		/*
+		for (Entry<Mailer, List<FisherSolver>> differentMarketsPerSingleMailer : fisherSolvers.entrySet()) {
+			String mailerData = differentMarketsPerSingleMailer.getKey().toString();
+			
+			for (int i = 0; i < maxIteration; i++) {
+				
+			}
+		}
+		*/
+		
+	}
+
+
+
+
+
+	private static double calcAverage(List<Double> vector) {
+		double sum = 0.0;
+		for (Double d : vector) {
+			sum += d;
+		}
+		return sum / vector.size();
+	}
 
 /*
 	private static void MarketsMeetMailers(List<MarketReps> marketReps, List<Mailer> mailers) {
@@ -160,10 +194,10 @@ public class MainSimulator {
 		List<Mailer> ans = new ArrayList<Mailer>();
 
 		List<CommunicationProtocolDelay> cpDelays = createCPDelay();
-		List<CommunicationProtocolDown> cpDown = createCPDown();
+		List<ProtocolDown> cpDown = createCPDown();
 
 		for (CommunicationProtocolDelay delay : cpDelays) {
-			for (CommunicationProtocolDown down : cpDown) {
+			for (ProtocolDown down : cpDown) {
 				ans.add(new Mailer(delay, down));
 			}
 		}
@@ -171,11 +205,11 @@ public class MainSimulator {
 		return ans;
 	}
 
-	private static List<CommunicationProtocolDown> createCPDown() {
-		List<CommunicationProtocolDown> ans = new ArrayList<CommunicationProtocolDown>();
+	private static List<ProtocolDown> createCPDown() {
+		List<ProtocolDown> ans = new ArrayList<ProtocolDown>();
 		for (double downSparsity : downSparsityProbs) {// set with market
 			if (downSparsity == 0) {
-				ans.add(new CommunicationProtocolDown());
+				ans.add(new ProtocolDown());
 			}
 
 			else {
@@ -183,7 +217,7 @@ public class MainSimulator {
 					for (double downInf : downInfProbs) {
 						for (double downNumIterProb : downNumIterProbs) {
 							for (double downNumIterParameter : downNumIterParameters) {
-								ans.add(new CommunicationProtocolDown(downSparsity, downK, downInf, downNumIterProb,
+								ans.add(new ProtocolDown(downSparsity, downK, downInf, downNumIterProb,
 										downNumIterParameter, copySparsityProb));
 							}
 						} // downNumIterProb;
@@ -299,7 +333,7 @@ public class MainSimulator {
 	 * market.createParameterMatrix(parameter, rng); } } } }
 	 */
 	
-	
+	/*
 	private static void createExcel() {
 
 		for (int i = 1; i <= 4; i++) {
@@ -322,7 +356,8 @@ public class MainSimulator {
 	}
 	
 
-	
+	*/
+	/*
 	private static void createFile(List<FisherData> data, int input) {
 		try {
 			String fileName = createFileName(input);
@@ -342,7 +377,9 @@ public class MainSimulator {
 		}
 
 	}
-
+*/
+	
+	/*
 	private static String createHeader() {
 		if (central) {
 			return FisherData.header();
@@ -352,7 +389,9 @@ public class MainSimulator {
 			return Market.header()+","+Mailer.header()+","+FisherSolver.header();
 		}
 	}
-
+*/
+	
+	/*
 	private static String createFileName(int input) {
 
 		String typeFile = null;
@@ -376,7 +415,9 @@ public class MainSimulator {
 
 		return typeFile + central1 + meanRepsStart1 + meanRepsEnd1;
 	}
-
+*/
+	
+	/*
 	private static FisherData calculateAverageLast(List<FisherData> lastToBeAverage) {
 
 		FisherData f = lastToBeAverage.get(0);
@@ -403,7 +444,9 @@ public class MainSimulator {
 
 		return ans;
 	}
-
+*/
+	
+	/*
 	private static double calculateAvgEnvyFree(List<FisherData> lastToBeAverage) {
 		List<Double> ans = new ArrayList<Double>();
 		for (FisherData f : lastToBeAverage) {
@@ -411,7 +454,8 @@ public class MainSimulator {
 		}
 		return calcAverage(ans);
 	}
-
+*/
+	/*
 	private static double calculateAvgRX(List<FisherData> lastToBeAverage) {
 		List<Double> ans = new ArrayList<Double>();
 		for (FisherData f : lastToBeAverage) {
@@ -419,7 +463,8 @@ public class MainSimulator {
 		}
 		return calcAverage(ans);
 	}
-
+*/
+	/*
 	private static double calculateAvgIterations(List<FisherData> lastToBeAverage) {
 		List<Double> ans = new ArrayList<Double>();
 		for (FisherData f : lastToBeAverage) {
@@ -427,14 +472,8 @@ public class MainSimulator {
 		}
 		return calcAverage(ans);
 	}
-
-	private static double calcAverage(List<Double> vector) {
-		double sum = 0.0;
-		for (Double d : vector) {
-			sum += d;
-		}
-		return sum / vector.size();
-	}
+*/
+	
 /*
 	private static List<FisherData> getLastFromToBeAverage(List<List<FisherData>> toBeAverage) {
 		List<FisherData> ans = new ArrayList<FisherData>();
@@ -556,7 +595,7 @@ public class MainSimulator {
 	 * for (int i = 0; i < rutil.length; i++) { for (int j = 0; j < rutil[i].length;
 	 * j++) { ans[i][j] = rutil[i][j].getUtility(1); } } return ans; }
 	 */
-
+/*
 	private static void runDistributed(List<Mailer> communicationProtocols, List<List<Market>> markets) {
 
 		for (List<Market> marketReps : markets) {
@@ -564,7 +603,8 @@ public class MainSimulator {
 		}
 
 	}
-
+*/
+	/*
 	private static void runDifferentCommunicationOnMarketReps(List<Mailer> communicationProtocols,
 			List<Market> marketReps) {
 
@@ -588,6 +628,8 @@ public class MainSimulator {
 		}
 
 	}
+	*/
+	
 /*
 	private static void handleAverageData(List<List<FisherData>> toBeAverage, int max) {
 		List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);

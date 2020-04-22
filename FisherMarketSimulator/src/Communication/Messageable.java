@@ -1,4 +1,7 @@
+package Communication;
 import java.util.List;
+
+import Market.Mailer;
 
 public interface Messageable {
 
