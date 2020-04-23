@@ -32,9 +32,9 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 	private boolean withTimeStamp;
 
 	
-	public Buyer(int i, List<Good> goods, Random r) {
+	public Buyer(int i, List<Good> goods, int marketId) {
 		this.id=i;
-		this.randomUtil = r;
+		this.randomUtil =new Random( goods.size()*10+marketId*100);
 		this.utilitiesMap = createUtils(goods);
 		this.goodsResponsibility=new TreeSet<Good>();
 	}
@@ -52,15 +52,21 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 		SortedMap<Good, Utility> ans = new TreeMap<Good, Utility>();
 		for (int j = 0; j < goods.size(); j++) {
 			Good g = goods.get(j);	
-			int goodId = g.getId();
-			int goodType = g.getType();
-			double value =MainSimulator.getRandomNormUtil(goodType, randomUtil);
+			double value =getRandomNormal();
+			if (value<0) {
+				value=0;
+			}
 			Utility util = new UtilityLinear(this,g,value);
 			ans.put(g, util);
 		}
 		return ans;
 		
 	}
+	
+	private  double getRandomNormal() {
+		return randomUtil.nextGaussian()*MainSimulator.stdUtil+MainSimulator.muUtil;
+	}
+	
 
 
 	public Utility getUtility(int j) {

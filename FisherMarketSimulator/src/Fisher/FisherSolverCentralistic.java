@@ -13,8 +13,10 @@ public class FisherSolverCentralistic extends FisherSolver {
 	protected int nofAgents;
 	protected int nofGoods;
 	protected double[][] utilites;
-	public FisherSolverCentralistic(Market market) {
-		super(market);
+	private double thrashold;
+	public FisherSolverCentralistic(Market market,int maxIteration, double threshold) {
+		super(market,  maxIteration,  threshold);
+		this.thrashold = threshold;
 		this.nofAgents = R.length;
 		this.nofGoods = R[0].length;
 
@@ -28,14 +30,14 @@ public class FisherSolverCentralistic extends FisherSolver {
 
 	// next iteration: calculates prices, calculates current valuation and
 	// update the bids
-	public FisherData iterate() {
+	public  Double[][] iterate() {
 		updateBidsUsingUtilites();
 		updatePriceVectorUsingBids();
 		updateCurrentAllocationMatrixAndChanges();
-		FisherData ans = new FisherDataCentralistic(currentAllocation, this.R, iterations, market);
+		//currentAllocation ans = new FisherDataCentralistic(currentAllocation, this.R, iterations, market);
 
 		// generateAllocations();
-		return ans;
+		return currentAllocation;
 	}
 
 	// -----------METHODS OF iterate------
@@ -85,7 +87,7 @@ public class FisherSolverCentralistic extends FisherSolver {
 	// -----------METHODS OF updateCurrentAllocationMatrixAndChanges------
 
 	private void updateCurrentAllocation(int i, int j) {
-		if (bids[i][j] / prices[j] > MainSimulator.THRESHOLD) {
+		if (bids[i][j] / prices[j] > this.thrashold) {
 			currentAllocation[i][j] = bids[i][j] / prices[j];// aaaaa
 		} else {
 			currentAllocation[i][j] = null;

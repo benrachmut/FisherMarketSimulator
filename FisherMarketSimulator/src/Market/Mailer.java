@@ -5,16 +5,17 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Random;
 
-import Communication.CommunicationProtocolDelay;
 import Communication.ProtocolDown;
 import Communication.Message;
 import Communication.Messageable;
 import Communication.ProtocolDelay;
+import Communication.ProtocolDelayEl;
 
 public class Mailer {
 	
 	private ProtocolDelay delay;
-	private ProtocolDown down;
+	private ProtocolDelay down;
+
 	private List<Message> messageBox;
 	private int[][] impCommmunicationMatrix;
 	
@@ -22,7 +23,6 @@ public class Mailer {
 	public Mailer(ProtocolDelay delay, ProtocolDown down) {
 		super();
 		this.delay = delay;
-		this.down = down;
 		this.messageBox = new ArrayList<Message>();
 
 	}
@@ -38,10 +38,15 @@ public class Mailer {
 	public String toString() {
 		return delay.toString()+","+down.toString();
 	}
-	public static String header(){
-		return CommunicationProtocolDelay.header()+","+ProtocolDown.header();
+
+	public static String header() {
+		if (MainSimulator.typeCommunication ==1) {
+			return ProtocolDelayEl.header()+","+ProtocolDown.header();
+		}
+		else {
+			return "";
+		}
 	}
-	
 	
 	public void createMessage(Messageable sender, int decisionCounter, Messageable reciever, double context) {
 		
@@ -91,60 +96,8 @@ public class Mailer {
 			System.out.println("index: " + i + ", message: " + messageBox.get(i));
 		}
 	}
-/*
-	public List<Double> getDelays() {
-		// TODO Auto-generated method stub
-		return this.delays;
-	}
-	*/
-/*
-	public boolean isPerfectCommunication() {
-		// TODO Auto-generated method stub
-		return this.delay.isPerfectCommunication();
-	}
 	
-	public double getDealyConstantSparsityProb() {
-		return this.delay.getDealyConstantSparsity();
-	}
-	
-	public Random getDelayConstantSparsityRand() {
-		return this.delay.getDelayConstantSparsityRand();
-	}
-
-	public double getDealyNoiseSparsityProb() {
-		// TODO Auto-generated method stub
-		return this.delay.getDealyNoiseSparsity();
-	}
-	
-	public Random getDelayNoiseSparsityRand() {
-		return this.delay.getDelayNoiseSparsityRand();
-	}
-
-	public boolean perfectFitNeverDown() {
-		// TODO Auto-generated method stub
-		return this.down.isPerfectFitNeverDown();
-	}
-
-	public double getDownSparseProb() {
-		// TODO Auto-generated method stub
-		return this.down.downSparseProb();
-	}
-
-	public Random getDownSparseRand() {
-		// TODO Auto-generated method stub
-		return this.down.downSparseRand();
-	}
-
-	public boolean isCopyFromConstantSparse() {
-		// TODO Auto-generated method stub
-		return this.down.isCopyFromConstantSparse();
-	}
-
 	public boolean isWithTimeStamp() {
-		// TODO Auto-generated method stub
 		return this.delay.isWithTimeStamp();
 	}
-	
-	*/
-	
 }

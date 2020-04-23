@@ -4,37 +4,57 @@ import java.util.Random;
 
 public class ProtocolDelayEl extends ProtocolDelay {
 
-	private double msgLostProb; // aka gamma
+	private double gamma; // aka gamma
 	private double sigma;
-	private double muLB; // aka k
-	private double noiseLB;
-	private double noiseUB;
+	private double k; // aka k
+	private double h;
+	private double delta;
+	private double lambda;
+	private double lambda_tag;
+
 	private Random msgLostRandom, delayNormalRandom, noiseRandom;
 
-	public ProtocolDelayEl(boolean perfectCommunication, boolean isTimeStamp, double msgLostProb, double sigma,
-			double muLB, double noiseLB, double noiseUB) {
+	public ProtocolDelayEl(boolean perfectCommunication, boolean isTimeStamp, double gamma, // aka gamma
+			double sigma, double k, // aka k
+			double h, double delta, double lambda, double lambda_Tag) {
+
 		super(perfectCommunication, isTimeStamp);
-		this.msgLostProb = msgLostProb;
+		this.gamma = gamma;
 		this.sigma = sigma;
-		this.muLB = muLB;
-		this.noiseLB = noiseLB;
-		this.noiseUB = noiseUB;
+		this.k = k;
+
+		this.gamma = gamma;
+		this.sigma = sigma;
+		this.k = k; // aka k
+		this.h = h;
+		this.delta = delta;
+		this.lambda = lambda;
+		this.lambda_tag = lambda_Tag;
 
 	}
 
-	public ProtocolDelayEl(boolean perfectCommunication) {
+	public ProtocolDelayEl() {
 		super(true, false);
-		this.msgLostProb = 0;
+		this.gamma = 0;
 		this.sigma = 0;
-		this.muLB = 0;
-		this.noiseLB = 0;
-		this.noiseUB = 0;
+		this.k = 0;
+		this.h = 0;
+		this.delta = 0;
+		this.lambda = 0;
+		this.lambda_tag = 0;
+
 	}
 
+	public  static String header() {
+		return ProtocolDelay.header()+",gamma,sigma,k,h,delta,lambda,lambda_tag"; 
+		
+	}
+	
+	
 	public void setSeeds(int marketId) {
-		long seed1 = marketId * 1000 + (int) ((1 - msgLostProb) * 100) + (int) (sigma * 10);
-		long seed2 = marketId * 1000 + (int) (muLB * 100) + (int) (noiseUB * 10);
-		long seed3 = marketId * 1000 + (int) (sigma * 100) + (int) (muLB * 10);
+		long seed1 = marketId * 1000 + (int) ((1 - gamma) * 100) + (int) (sigma * 10);
+		long seed2 = marketId * 1000 + (int) (k * 100) + (int) (delta * 10);
+		long seed3 = marketId * 1000 + (int) (sigma * 100) + (int) (k * 10);
 
 		delayNormalRandom = new Random(seed1);
 		noiseRandom = new Random(seed2);
@@ -49,19 +69,34 @@ public class ProtocolDelayEl extends ProtocolDelay {
 		}
 
 		double pLost = msgLostRandom.nextDouble();
-		if (pLost < this.msgLostProb) {
+		if (pLost < this.gamma) {
 			return null;
 		}
 
 		else {
 
-			double n = this.noiseLB + this.noiseRandom.nextDouble() * (this.noiseUB - this.noiseLB);
-			double mu = muLB + p_ij * n;
+			double n = this.h + getNij(p_ij);
+
+			double mu = k + p_ij * n;
 			double z = delayNormalRandom.nextGaussian();
 			double ans = z * this.sigma + mu;
 			return (int) ans;
 		}
 
+	}
+
+	private double getNij(double p_ij) {
+
+		double rnd = this.noiseRandom.nextDouble();
+		if (rnd < this.lambda * p_ij) {
+			return this.h;
+		}
+		if (rnd >= this.lambda * p_ij && rnd < (1 - this.lambda * p_ij) * this.lambda_tag) {
+			return this.h * delta;
+		} else {
+			return this.h * delta * delta;
+
+		}
 	}
 
 	/*

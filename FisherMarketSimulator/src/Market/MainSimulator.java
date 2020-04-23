@@ -1,4 +1,5 @@
 package Market;
+
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -12,6 +13,8 @@ import java.util.Map.Entry;
 import java.util.Random;
 
 import Communication.CommunicationProtocolDelay;
+import Communication.ProtocolDelay;
+import Communication.ProtocolDelayEl;
 import Communication.ProtocolDown;
 import Fisher.FisherData;
 import Fisher.FisherDataCentralistic;
@@ -34,12 +37,12 @@ public class MainSimulator {
 	 * parameters for withdrawing utilities maybe change to actual calculating
 	 * withdrawing parameters
 	 */
-	public static double stdUtil = 100;
-	public static double muUtil = 100;
-	public static int numberTypes = 4;
+	public static double stdUtil = 500;
+	public static double muUtil = 50;
+	// public static int numberTypes = 4;
 	/* market size */
-	public static int buyersNum =6 ;
-	public static int goodsNum = 9 ;
+	public static int buyersNum = 6;
+	public static int goodsNum = 9;
 	/* number of trials, start and ends */
 	public static int meanRepsStart = 0;
 	public static int meanRepsEnd = 1;
@@ -48,7 +51,7 @@ public class MainSimulator {
 	 */
 	public static int maxIteration = 10000;
 	/* Random variables */
-	//public static Random utilRandom, goodTypesRandom;
+	// public static Random utilRandom, goodTypesRandom;
 	/*
 	 * sometimes agent is envy just a little and algo needs to continue alot until
 	 * it changes
@@ -63,97 +66,84 @@ public class MainSimulator {
 	// public static int[] distributionParameters = { 0, 25, 50, 200, 500 };
 
 	// -------------DELAY PARAMETERS-------------
-/*
-	public static double[] dealyConstantSparsityProbs = { 1 };// set with market
-	public static double[] delayConstants = { 5 };
-	public static double[] dealyNoiseSparsityProbs = { 1 };// set with market
-	public static double[] delayMuNoises = { 10 };
-	public static double[] delayStdNoises = { 3 };
-	public static boolean[] withTimeStamps = {true,false};
-*/
-	//public static Random dealyConstantSparsityRand, dealyNoiseSparsityRand;
+
+	// --- type delay
+	public static int typeCommunication = 1; // 1 = el
+	// ----For all type delay
+	public static boolean[] perfectCommunications = { true, false };
+	public static boolean[] isTimeStamps = { true, false };
+
+	// ----For el delay
+	public static double[] gammas = { 0.02 }; // aka gamma
+	public static double[] sigmas = { 10 };
+	public static double[] ks = { 10 }; // aka k
+	public static double[] hs = { 5 };
+	public static double[] deltas = { 10 };
+	public static double[] lambdas = { 0.5 };
+	public static double[] lambda_tags = { 0.66 };
+
+	// public static Random dealyConstantSparsityRand, dealyNoiseSparsityRand;
 
 	// -------------DOWN PARAMETERS-------------
 	/* should csp be withdrawn or copied from dcsp */
-/*
-	public static boolean copySparsityProb = false;// used in market
-	public static double[] downSparsityProbs = { 0 };// set with market
-	public static int[] downKs = { 5 };
-	public static double[] downInfProbs = { 0 };
-	public static double[] downNumIterProbs = { 0 };	
-	public static double[] downNumIterParameters = { 0 };
-*/
+	/*
+	 * public static boolean copySparsityProb = false;// used in market public
+	 * static double[] downSparsityProbs = { 0 };// set with market public static
+	 * int[] downKs = { 5 }; public static double[] downInfProbs = { 0 }; public
+	 * static double[] downNumIterProbs = { 0 }; public static double[]
+	 * downNumIterParameters = { 0 };
+	 */
 
-	public static Map<Mailer,List<FisherSolver>>fisherSolvers = 
-			new HashMap<Mailer,List<FisherSolver>>();
-	
-	public static List<String>rawData;
-	public static List<String>avgData;
-	
-	
-	public static List<String>rawLast;
-	public static List<String>avgLast;
+	public static Map<Mailer, List<FisherSolver>> fisherSolvers = new HashMap<Mailer, List<FisherSolver>>();
 
-	
+	public static List<String> rawData;
+	public static List<String> avgData;
+	public static List<String> rawLast;
+	public static List<String> avgLast;
+
 	public static void main(String[] args) {
-
 
 		List<Market> markets = createMarkets();
 		List<Mailer> mailers = createCommunicationProtocols();
-		
+
 		for (Mailer singleMailer : mailers) {
-			iterateMailerOverAllMarkets(singleMailer,markets);
+			iterateMailerOverAllMarkets(singleMailer, markets);
 		}
 		createData();
-		
-		
 		createExcel();
 	}
 
-
-	
-
-
 	private static void iterateMailerOverAllMarkets(Mailer mailer, List<Market> markets) {
-		List<FisherSolver>list = new ArrayList<FisherSolver>();
+		List<FisherSolver> list = new ArrayList<FisherSolver>();
 		for (Market market : markets) {
-			mailer.resetMailer(market.getId(),market.getImperfectCommunicationMatrix());
+			mailer.resetMailer(market.getId(), market.getImperfectCommunicationMatrix());
 			market.meetMailer(mailer);
 			FisherSolver fs = new FisherSolverDistributed(market, maxIteration, THRESHOLD);
 			list.add(fs);
-		}	
-		fisherSolvers.put(mailer,list);
+		}
+		fisherSolvers.put(mailer, list);
 	}
-
 
 	private static void createData() {
 		createRawData();
 		createAvgData();
 		createRawDataLast();
 		createAvgDataLast();
-
-		
-		
 	}
-	
-	
+
 	private static void createRawData() {
-		
+
 		/*
-		for (Entry<Mailer, List<FisherSolver>> differentMarketsPerSingleMailer : fisherSolvers.entrySet()) {
-			String mailerData = differentMarketsPerSingleMailer.getKey().toString();
-			
-			for (int i = 0; i < maxIteration; i++) {
-				
-			}
-		}
-		*/
-		
+		 * for (Entry<Mailer, List<FisherSolver>> differentMarketsPerSingleMailer :
+		 * fisherSolvers.entrySet()) { String mailerData =
+		 * differentMarketsPerSingleMailer.getKey().toString();
+		 * 
+		 * for (int i = 0; i < maxIteration; i++) {
+		 * 
+		 * } }
+		 */
+
 	}
-
-
-
-
 
 	private static double calcAverage(List<Double> vector) {
 		double sum = 0.0;
@@ -163,37 +153,19 @@ public class MainSimulator {
 		return sum / vector.size();
 	}
 
-/*
-	private static void MarketsMeetMailers(List<MarketReps> marketReps, List<Mailer> mailers) {
-		for (MarketReps marketRep : marketReps) {
-			marketRep.meetMailers(mailers);
-		}
-		
-	}
-*/
-
-
-
-
 	private static List<Market> createMarkets() {
-		//for (Integer b : buyers) {
-		//	currBuyersNum = b;
-		//	for (Integer s : goods) {
-			//	currGoodsNum = s;
-			List<Market> markets = new ArrayList<Market>();
-				// List<Market> repsMarkets = new ArrayList<Market>();
-				for (int i = meanRepsStart; i < meanRepsEnd; i++) {
-					//restartRandomUtilAndType(buyersNum, goodsNum, i);
-					Market market = new Market(buyersNum, goodsNum, i);
-					markets.add(market);
-				}			
+		List<Market> markets = new ArrayList<Market>();
+		for (int i = meanRepsStart; i < meanRepsEnd; i++) {
+			Market market = new Market(buyersNum, goodsNum, i);
+			markets.add(market);
+		}
 		return markets;
 	}
 
 	private static List<Mailer> createCommunicationProtocols() {
 		List<Mailer> ans = new ArrayList<Mailer>();
 
-		List<CommunicationProtocolDelay> cpDelays = createCPDelay();
+		List<ProtocolDelay> cpDelays = createCPDelay();
 		List<ProtocolDown> cpDown = createCPDown();
 
 		for (CommunicationProtocolDelay delay : cpDelays) {
@@ -205,529 +177,60 @@ public class MainSimulator {
 		return ans;
 	}
 
-	private static List<ProtocolDown> createCPDown() {
-		List<ProtocolDown> ans = new ArrayList<ProtocolDown>();
-		for (double downSparsity : downSparsityProbs) {// set with market
-			if (downSparsity == 0) {
-				ans.add(new ProtocolDown());
+	private static List<ProtocolDelay> createCPDelay() {
+		List<ProtocolDelay> ans = new ArrayList<ProtocolDelay>();
+		for (boolean perfectP : perfectCommunications) {
+			if (perfectP == true) {
+				ans.add(createDefultProtocolDelay());
+			} else {
+				ans.addAll(createCombinationsDelay());
 			}
-
-			else {
-				for (int downK : downKs) {
-					for (double downInf : downInfProbs) {
-						for (double downNumIterProb : downNumIterProbs) {
-							for (double downNumIterParameter : downNumIterParameters) {
-								ans.add(new ProtocolDown(downSparsity, downK, downInf, downNumIterProb,
-										downNumIterParameter, copySparsityProb));
-							}
-						} // downNumIterProb;
-					} // downInfProb
-				} // downK
-			} // else
-		} // downSparsity(
+		}
 		return ans;
 	}
 
-	private static List<CommunicationProtocolDelay> createCPDelay() {
-		List<CommunicationProtocolDelay> ans = new ArrayList<CommunicationProtocolDelay>();
-		CommunicationProtocolDelay cpDelay = null;
-		for (double dealyConstantSparsity : dealyConstantSparsityProbs) {// set with market
-			if (dealyConstantSparsity == 0) {
-				ans.add(new CommunicationProtocolDelay());
-			} else {
-				for (double delayConstant : delayConstants) {
-					for (double dealyNoiseSparsity : dealyNoiseSparsityProbs) {// set with market
-						for (double mu : delayMuNoises) {
-							for (double std : delayStdNoises) {
-								for (boolean isWithTimeStamp : withTimeStamps) {
-									ans.add(new CommunicationProtocolDelay(dealyConstantSparsity, delayConstant,
-											dealyNoiseSparsity, mu, std, isWithTimeStamp));
+	private static List<ProtocolDelay> createCombinationsDelay() {
+		List<ProtocolDelay> ans = new ArrayList<ProtocolDelay>();
+
+		for (boolean timestampBoolean : isTimeStamps) {
+			if (typeCommunication == 1) {
+				ans.addAll(createCPDelayEl(false, timestampBoolean));
+			}
+		}
+		return ans;
+	}
+
+	private static ProtocolDelay createDefultProtocolDelay() {
+		if (typeCommunication == 1) {
+			return new ProtocolDelayEl();
+		} else {
+			return null;
+		}
+
+	}
+
+	private static List<ProtocolDelay> createCPDelayEl(boolean perfectP, boolean timestampBoolean) {
+		List<ProtocolDelay> ans = new ArrayList<ProtocolDelay>();
+		// ----For el delay
+
+		for (double gamma : gammas) {
+			for (double sigma : sigmas) {
+				for (double k : ks) {
+					for (double h : hs) {
+						for (double delta : deltas) {
+							for (double lambda : lambdas) {
+								for (double lambda_tag : lambda_tags) {
+									ans.add(new ProtocolDelayEl(perfectP, timestampBoolean, gamma, sigma, k, h, delta,
+											lambda, lambda_tag));
 								}
-							} // std
-						} // mu
-					} // dealyNoiseSparsity
-				} // delayConstant
-			} // else zero
-		} // dealyConstantSparsity
-		return ans;
-	}
-	
-	
-	public static double getRandomNormUtil(int goodType, Random randomUtil) {
-		return getRandomNormal(randomUtil, ((double)goodType)*muUtil,stdUtil);
-	}
-
-	private static double getRandomNormal(Random randomUtil, double mu, double std) {
-		return randomUtil.nextGaussian()*std+mu;
-	}
-	
-	
-/*
-	private static void setSparsityForMarkets(List<List<Market>> markets) {
-		for (List<Market> list : markets) {
-			for (Market market : list) {
-				setSparsityPerSingleMarket(market);
-			}
-		}
-	}
-	*/
-/*
-	private static void setSparsityPerSingleMarket(Market market) {
-		
-		long[] seeds = composeSeeds(market);
-
-		for (double p : dealyConstantSparsityProbs) {
-			dealyConstantSparsityRand = new Random(seeds[0]);
-			market.setDealyConstantSparsity(p, dealyConstantSparsityRand);
-		}
-
-		for (double p : dealyNoiseSparsityProbs) {
-			dealyNoiseSparsityRand = new Random(seeds[1]);
-			market.setDealyNoiseSparsity(p, dealyNoiseSparsityRand);
-		}
-
-		for (double p : downSparsityProbs) {
-			downSparsityRand = new Random(seeds[2]);
-			market.setDownSparsityRand(p, downSparsityRand);
-		}
-
-	}
-	*/
-/*
-	private static long[] composeSeeds(Market market) {
-		long[] ans = new long[3];
-
-		int id = market.getId();
-		int numBuyers = market.getBuyers().size();
-		int numGoods = market.getGoods().size();
-
-		ans[0] = id * 1000 + numBuyers * 100 + numGoods * 10;
-		ans[1] = numBuyers * 1000 + id * 100 + numGoods * 10;
-		ans[2] = numGoods * 1000 + numBuyers * 100 + id * 10;
+							} // lambda
+						} // delta
+					} // h
+				} // k
+			} // sigma
+		} // gamma
 
 		return ans;
 	}
-	*/
-
-	/*
-	 * private static void handleDistributions() { if (distributionDelayType == 1) {
-	 * distributionDelayString = "Uniform"; } else { distributionDelayString =
-	 * "Exponential"; }
-	 * 
-	 * if (distributionParameterType == 1) { distributionParameterString =
-	 * "Uniform"; } else { distributionParameterString = "Exponential"; }
-	 * 
-	 * }
-	 */
-	/*
-	 * private static void setParametersForMarkets(List<List<Market>> markets) {
-	 * RandomNumberGenerator rng = null; if (distributionParameterType == 1) {
-	 * 
-	 * rng = RandomNumberGenerator.Uniform; }
-	 * 
-	 * if (distributionParameterType == 2) { rng =
-	 * RandomNumberGenerator.Exponential; }
-	 * 
-	 * for (List<Market> list : markets) { for (Market market : list) { for (int
-	 * parameter : distributionParameters) { currParameter = parameter;
-	 * market.createParameterMatrix(parameter, rng); } } } }
-	 */
-	
-	/*
-	private static void createExcel() {
-
-		for (int i = 1; i <= 4; i++) {
-
-			if (i == 1) {
-				createFile(averageData, i);
-			}
-			if (i == 2) {
-				createFile(allData, i);
-			}
-			if (i == 3) {
-				createFile(averageDataLast, i);
-			}
-			if (i == 4) {
-				createFile(allDataLast, i);
-			}
-
-		}
-
-	}
-	
-
-	*/
-	/*
-	private static void createFile(List<FisherData> data, int input) {
-		try {
-			String fileName = createFileName(input);
-			FileWriter s = new FileWriter(fileName + ".csv");
-			BufferedWriter out = new BufferedWriter(s);
-			String h = createHeader();
-			out.write(h);
-			out.newLine();
-
-			for (FisherData fd : data) {
-				out.write(fd.toString());
-				out.newLine();
-			}
-			out.close();
-		} catch (IOException e) {
-			System.err.println("Couldn't write to file");
-		}
-
-	}
-*/
-	
-	/*
-	private static String createHeader() {
-		if (central) {
-			return FisherData.header();
-		}
-
-		else {
-			return Market.header()+","+Mailer.header()+","+FisherSolver.header();
-		}
-	}
-*/
-	
-	/*
-	private static String createFileName(int input) {
-
-		String typeFile = null;
-		if (input == 1) {
-			typeFile = "averageAll";
-		}
-		if (input == 2) {
-			typeFile = "fullAll";
-		}
-		if (input == 3) {
-			typeFile = "averageLast";
-		}
-		if (input == 4) {
-			typeFile = "fullLast";
-		}
-
-		typeFile = "typeFile_" + typeFile + ",";
-		String central1 = "central_" + central + ",";
-		String meanRepsStart1 = "start_" + meanRepsStart + ",";
-		String meanRepsEnd1 = "end_" + meanRepsEnd;
-
-		return typeFile + central1 + meanRepsStart1 + meanRepsEnd1;
-	}
-*/
-	
-	/*
-	private static FisherData calculateAverageLast(List<FisherData> lastToBeAverage) {
-
-		FisherData f = lastToBeAverage.get(0);
-		int numByuersF = f.getNumByuers();
-		int numGoodsF = f.getNumGoods();
-		double iterationF = calculateAvgIterations(lastToBeAverage);
-		String algoF = f.getAlgo();
-		boolean considerDecisionCounterF = f.getConsiderDecisionCounter();
-		int maxIterationF = f.getMaxIteration();
-		double avgRX = calculateAvgRX(lastToBeAverage);
-		double envyFreeF = calculateAvgEnvyFree(lastToBeAverage);
-		FisherData ans = null;
-		if (!central) {
-			String distributionDelay = ((FisherDataDistributed) f).getDistributionDelay();
-			String distributionParameter = ((FisherDataDistributed) f).getDistributionParameter();
-			int parameterF = ((FisherDataDistributed) f).getParamter();
-			ans = new FisherDataDistributed(-1, numByuersF, numGoodsF, iterationF, algoF, considerDecisionCounterF,
-					maxIterationF, avgRX, envyFreeF, distributionDelay, distributionParameter, parameterF);
-		} else {
-			ans = new FisherDataCentralistic(-1, numByuersF, numGoodsF, iterationF, algoF, considerDecisionCounterF,
-					maxIterationF, avgRX, envyFreeF);
-
-		}
-
-		return ans;
-	}
-*/
-	
-	/*
-	private static double calculateAvgEnvyFree(List<FisherData> lastToBeAverage) {
-		List<Double> ans = new ArrayList<Double>();
-		for (FisherData f : lastToBeAverage) {
-			ans.add(f.getEnvyFree());
-		}
-		return calcAverage(ans);
-	}
-*/
-	/*
-	private static double calculateAvgRX(List<FisherData> lastToBeAverage) {
-		List<Double> ans = new ArrayList<Double>();
-		for (FisherData f : lastToBeAverage) {
-			ans.add(f.getSumRX());
-		}
-		return calcAverage(ans);
-	}
-*/
-	/*
-	private static double calculateAvgIterations(List<FisherData> lastToBeAverage) {
-		List<Double> ans = new ArrayList<Double>();
-		for (FisherData f : lastToBeAverage) {
-			ans.add(f.getIteration());
-		}
-		return calcAverage(ans);
-	}
-*/
-	
-/*
-	private static List<FisherData> getLastFromToBeAverage(List<List<FisherData>> toBeAverage) {
-		List<FisherData> ans = new ArrayList<FisherData>();
-		for (List<FisherData> list : toBeAverage) {
-			FisherData last = list.get(list.size() - 1);
-			ans.add(last);
-		}
-		return ans;
-	}
-	*/
-/*
-	private static List<FisherData> calculateAverage(List<List<FisherData>> toBeAverage, int max) {
-		List<FisherData> ans = new ArrayList<FisherData>();
-		checkIfToBeAverageIsValid(toBeAverage, max);
-		int counter = 0;
-		FisherData fd;
-
-		while (counter != max) {
-
-			List<FisherData> sameIterList = new ArrayList<FisherData>();
-
-			for (List<FisherData> list : toBeAverage) {
-				sameIterList.add(list.get(counter));
-			}
-
-			FisherData t = sameIterList.get(0);
-			int idF = -1;
-			int numByuersF = t.getNumByuers();
-			int numGoodsF = t.getNumGoods();
-			double iterationF = t.getIteration();
-			String algoF = t.getAlgo();
-			boolean considerDecisionCounterF = t.getConsiderDecisionCounter();
-			int maxIterationF = t.getMaxIteration();
-			double rxF = calculateAvgRX(sameIterList);
-			double envyFreeF = calculateAvgEnvyFree(sameIterList);
-			if (!central) {
-				int param = ((FisherDataDistributed) t).getParamter();
-				String distDelay = ((FisherDataDistributed) t).getDistributionDelay();
-				String distParam = ((FisherDataDistributed) t).getDistributionParameter();
-				ans.add(new FisherDataDistributed(idF, numByuersF, numGoodsF, iterationF, algoF,
-						considerDecisionCounterF, maxIterationF, rxF, envyFreeF, distDelay, distParam, param));
-			} else {
-				ans.add(new FisherDataCentralistic(idF, numByuersF, numGoodsF, iterationF, algoF,
-						considerDecisionCounterF, maxIterationF, rxF, envyFreeF));
-			}
-
-			counter++;
-		}
-
-		return ans;
-	}
-
-*/
-	/*
-	 * private static FisherData getFisherDataAverage(List<FisherData> sameIterList,
-	 * int idF, int numByuersF, int numGoodsF, int iterationF, String algoF, boolean
-	 * considerDecisionCounterF, int maxIterationF) {
-	 * 
-	 * double sumRX = 0.0; double sumR = 0.0; double sumX = 0.0;
-	 * 
-	 * double n = sameIterList.size(); for (FisherData fisherData : sameIterList) {
-	 * sumRX += fisherData.getSumRX(); }
-	 * 
-	 * double avgR = sumR / sameIterList.size(); double avgX = sumX /
-	 * sameIterList.size(); double avgRX = sumRX / sameIterList.size();
-	 * 
-	 * if (central) { return new FisherDataCentralistic(idF, numByuersF, numGoodsF,
-	 * iterationF, algoF, considerDecisionCounterF, maxIterationF, avgR, avgX,
-	 * avgRX); } else {
-	 * 
-	 * FisherDataDistributed t = (FisherDataDistributed) sameIterList.get(0); int
-	 * param = t.getParamter(); String distDelay = t.getDistributionDelay(); String
-	 * distParam = t.getDistributionParameter();
-	 * 
-	 * return new FisherDataDistributed(idF, numByuersF, numGoodsF, iterationF,
-	 * algoF, considerDecisionCounterF, maxIterationF, avgR, avgX, avgRX, distDelay,
-	 * distParam, param); }
-	 * 
-	 * }
-	 */
-	/*
-	private static void checkIfToBeAverageIsValid(List<List<FisherData>> toBeAverage, int max) {
-		for (List<FisherData> list : toBeAverage) {
-			int sizeOfList = list.size();
-			if (sizeOfList != max) {
-				System.err.println("size of a list is " + sizeOfList + " and max is " + max);
-				throw new RuntimeException();
-			}
-		}
-
-	}
-	*/
-/*
-	private static List<List<FisherData>> fixAverage(List<List<FisherData>> toBeAverage, int max) {
-		for (List<FisherData> list : toBeAverage) {
-			if (list.size() < max) {
-				FisherData lastFisherDate = list.get(list.size() - 1);
-				FisherData copiedFisherData;
-				double iterationOfCopied = lastFisherDate.getIteration() + 1;
-				while (list.size() < max) {
-
-					if (central) {
-						copiedFisherData = new FisherDataCentralistic(lastFisherDate, iterationOfCopied);
-					} else {
-						copiedFisherData = new FisherDataDistributed(lastFisherDate, iterationOfCopied);
-					}
-					iterationOfCopied++;
-					list.add(copiedFisherData);
-				}
-			}
-		}
-		return toBeAverage;
-	}
-	*/
-	/*
-	 * private static Double[][] turnUtilToR(Utility[][] rutil) { Double[][] ans =
-	 * new Double[rutil.length][rutil[0].length];
-	 * 
-	 * for (int i = 0; i < rutil.length; i++) { for (int j = 0; j < rutil[i].length;
-	 * j++) { ans[i][j] = rutil[i][j].getUtility(1); } } return ans; }
-	 */
-/*
-	private static void runDistributed(List<Mailer> communicationProtocols, List<List<Market>> markets) {
-
-		for (List<Market> marketReps : markets) {
-			runDifferentCommunicationOnMarketReps(communicationProtocols, marketReps);
-		}
-
-	}
-*/
-	/*
-	private static void runDifferentCommunicationOnMarketReps(List<Mailer> communicationProtocols,
-			List<Market> marketReps) {
-
-		for (Mailer cp : communicationProtocols) {
-			int max = 0;
-			List<List<FisherData>> toBeAverage = new ArrayList<List<FisherData>>();
-			List<FisherDataDelay> averageDelayPerMarket = new ArrayList<FisherDataDelay>();
-
-			for (Market market : marketReps) {
-				MailerZZZZ mailer = updateMarket(market, cp);
-				List<FisherData> data = runFisher(market);
-				max = updateMaxIteration(max, data.size());
-				handleData(data, toBeAverage, averageDelayPerMarket, mailer, market, parameter);
-				System.out.println(market);
-			}
-			// FisherDataDelay averageDelay =
-			// createWeightedDealyData(averageDelayPerMarket);
-			// averageWeightedDelayPerParameter.add(averageDelay);
-			handleAverageData(toBeAverage, max);
-
-		}
-
-	}
-	*/
-	
-/*
-	private static void handleAverageData(List<List<FisherData>> toBeAverage, int max) {
-		List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
-		averageDataLast.add(calculateAverageLast(lastToBeAverage));
-		toBeAverage = fixAverage(toBeAverage, max);
-		List<FisherData> average = calculateAverage(toBeAverage, max);
-		averageData.addAll(average);
-
-	}
-	*/
-
-	/*
-	 * private static FisherDataDelay createWeightedDealyData(List<FisherDataDelay>
-	 * averageDelayPerMarket) { new return null; }
-	 */
-
-	/*
-	private static void handleData(List<FisherData> data, List<List<FisherData>> toBeAverage,
-			List<FisherDataDelay> averageDelayPerMarket, MailerZZZZ mailer, Market market, int inputParameter) {
-		toBeAverage.add(data);
-		allData.addAll(data);
-		allDataLast.add(data.get(data.size() - 1));
-		handleDelayData(mailer, market, averageDelayPerMarket, inputParameter);
-	}
-*/
-	/*
-	private static void handleDelayData(MailerZZZZ mailer, Market market, List<FisherDataDelay> averageDelayPerMarket,
-			int inputParameter) {
-		List<Double> delays = mailer.getDelays();
-		int numberMessages = delays.size();
-		double averageDelay = calcAverage(delays);
-		FisherDataDelay fdDelay = new FisherDataDelay(market, distributionParameterString, distributionDelayString,
-				inputParameter, averageDelay, numberMessages);
-		averageDelayPerMarket.add(fdDelay);
-
-	}
-	*/
-/*
-	private static List<FisherData> runFisher(Market market) {
-		FisherSolver f = new FisherSolverDistributed(market);
-		return f.algorithm();
-	}
-*/
-	/*
-	private static MailerZZZZ updateMarket(Market market, Mailer cp) {
-		// double[][] parameterMatrix = market.getParametersMatrix(parameter);
-		MailerZZZZ mailer = new MailerZZZZ(cp);
-		market.restartMarketBetweenRuns(mailer);
-		return mailer;
-	}
-	*/
-
-	/*
-	private static void runCentralistic(List<List<Market>> markets) {
-
-		for (List<Market> list : markets) {
-			List<List<FisherData>> toBeAverage = new ArrayList<List<FisherData>>();
-			int max = 0;
-			for (Market market : list) {
-
-				FisherSolver f = new FisherSolverCentralistic(market);
-				List<FisherData> lonelyRunData = f.algorithm();
-				max = updateMaxIteration(max, lonelyRunData.size());
-				toBeAverage.add(lonelyRunData);
-				allData.addAll(lonelyRunData);
-				allDataLast.add(lonelyRunData.get(lonelyRunData.size() - 1));
-				// System.out.println(market);
-			}
-
-			List<FisherData> lastToBeAverage = getLastFromToBeAverage(toBeAverage);
-			averageDataLast.add(calculateAverageLast(lastToBeAverage));
-
-			toBeAverage = fixAverage(toBeAverage, max);
-			List<FisherData> average = calculateAverage(toBeAverage, max);
-			averageData.addAll(average);
-
-			// averageDataLast;
-
-			// dataToBeAverage.add(toBeAverage);
-		}
-
-	}
-*/
-	
-	/*
-	private static int updateMaxIteration(int maxIteration, int currentMaxIter) {
-		if (maxIteration < currentMaxIter) {
-			return currentMaxIter;
-		} else {
-			return maxIteration;
-		}
-	}
-
-*/
-
-
-
-
-
 
 }

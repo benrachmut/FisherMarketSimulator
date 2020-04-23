@@ -15,7 +15,6 @@ import java.util.TreeSet;
 
 public class Good implements Messageable, Comparable<Good> {
 
-	private int type;
 	private int id;
 	private Mailer mailer;
 	private SortedMap<Buyer, Double> bidsRecieved;
@@ -26,8 +25,7 @@ public class Good implements Messageable, Comparable<Good> {
 	private Buyer assignedBuyer;
 	private boolean withTimeStamp;
 	
-	public Good(int type, int i) {
-		this.type = type;
+	public Good( int i) {
 		this.id = i;
 	}
 	
@@ -42,10 +40,11 @@ public class Good implements Messageable, Comparable<Good> {
 		// TODO Auto-generated method stub
 		return "g" + this.id;
 	}
-
+/*
 	public int getType() {
 		return this.type;
 	}
+	*/
 
 	public int getId() {
 		return this.id;
@@ -55,7 +54,6 @@ public class Good implements Messageable, Comparable<Good> {
 	public void updateMailer(Mailer mailer) {
 		this.mailer = mailer;
 		this.withTimeStamp = mailer.isWithTimeStamp();
-
 	}
 
 	public void resetGoodsBetweenRuns() {

@@ -1,7 +1,24 @@
 package Communication;
 import java.util.Random;
 
-public class ProtocolDown {
+public abstract class ProtocolDown {
+
+	private boolean isDown;
+	
+	
+	
+	public ProtocolDown(boolean isDown) {
+		super();
+		this.isDown = isDown;
+	}
+	public static String header() {
+		// TODO Auto-generated method stub
+		return "Is Down";
+	}
+	@Override
+	public String toString() {
+		return Boolean.toString(isDown);
+	}
 	
 	/*
 	private double downSparsity;

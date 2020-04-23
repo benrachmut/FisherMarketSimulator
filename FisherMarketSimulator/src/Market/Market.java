@@ -29,7 +29,7 @@ public class Market {
 		this.id = i;
 
 		rUtil = new Random((buyersNum * 10) + (goodsNum * 100) + (i * 1000));
-		rGoodTypes = new Random((buyersNum * 100) + (goodsNum * 10) + (i * 1000));
+		//rGoodTypes = new Random((buyersNum * 100) + (goodsNum * 10) + (i * 1000));
 
 		this.goods = createGoods(goodsNum);
 		this.buyers = createBuyers(buyersNum);
@@ -109,7 +109,7 @@ public class Market {
 		List<Buyer> ans = new ArrayList<Buyer>();
 
 		for (int i = 0; i < buyersNum; i++) {
-			Buyer b = new Buyer(i, goods, rUtil);
+			Buyer b = new Buyer(i, goods, this.id);
 			ans.add(b);
 		}
 		return ans;
@@ -119,13 +119,13 @@ public class Market {
 		List<Good> ans = new ArrayList<Good>();
 
 		for (int i = 0; i < goodsNum; i++) {
-			Good g = new Good(getType(), i);
+			Good g = new Good( i);
 			ans.add(g);
 		}
 
 		return ans;
 	}
-
+/*
 	private int getType() {
 		int type = 0;
 		do {
@@ -134,6 +134,7 @@ public class Market {
 
 		return type;
 	}
+	*/
 	/*
 	 * private void updateMailer(Mailer mailer, int parameter) {
 	 * this.currentParameter = parameter; this.mailer = mailer; double[][]
