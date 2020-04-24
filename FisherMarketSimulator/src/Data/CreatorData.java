@@ -77,7 +77,7 @@ public class CreatorData {
 	}
 
 	private void createAvgLast() {
-		String marketData = MainSimulator.buyersNum + "," + MainSimulator.goodsNum;
+		String marketData = -1 + ","+MainSimulator.buyersNum + "," + MainSimulator.goodsNum;
 		
 		for (Entry<Mailer, List<FisherSolver>> differentMarketsPerSingleMailer : fisherSolvers.entrySet()) {
 			String mailerData = differentMarketsPerSingleMailer.getKey().toString();
@@ -120,7 +120,7 @@ public class CreatorData {
 	}
 
 	private void createAvgData() {
-		String marketData = MainSimulator.buyersNum + "," + MainSimulator.goodsNum;
+		String marketData = -1 + ","+MainSimulator.buyersNum + "," + MainSimulator.goodsNum;
 		for (Entry<Mailer, List<FisherSolver>> differentMarketsPerSingleMailer : fisherSolvers.entrySet()) {
 			String mailerData = differentMarketsPerSingleMailer.getKey().toString();
 			List<FisherSolver> toAverage = differentMarketsPerSingleMailer.getValue();
@@ -134,7 +134,7 @@ public class CreatorData {
 				}
 				double rxAvg = calcAverageDouble(rxs);
 				double envyFreesAvg = calcAverageDouble(envyFrees);
-				String fisherData = MainSimulator.maxIteration + "," + MainSimulator.THRESHOLD + "," + -1 + "," + rxAvg
+				String fisherData = MainSimulator.maxIteration + "," + MainSimulator.THRESHOLD + "," + i + "," + rxAvg
 						+ "," + envyFreesAvg;
 
 				avgData.add(mailerData + "," + marketData + "," + fisherData);

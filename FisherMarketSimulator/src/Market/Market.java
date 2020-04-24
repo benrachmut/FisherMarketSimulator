@@ -101,14 +101,14 @@ public class Market {
 	}
 
 	public static String header() {
-		return "id" + "," + "buyers" + "," + "goods";
+		return "Trial" + "," + "Buyers" + "," + "Goods";
 	}
 
 	private List<Buyer> createBuyers(int buyersNum) {
 		List<Buyer> ans = new ArrayList<Buyer>();
 
 		for (int i = 0; i < buyersNum; i++) {
-			Buyer b = new Buyer(i, goods, this.id);
+			Buyer b = new Buyer(i, goods);
 			ans.add(b);
 		}
 		return ans;

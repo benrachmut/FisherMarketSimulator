@@ -301,9 +301,9 @@ public abstract class FisherSolver {
 	public abstract Double[][] iterate();
 
 	public boolean isStable() {
-		boolean isStable = change < this.threshold;
+		//boolean isStable = change < this.threshold;
 		boolean isComplete = this.iteration == MainSimulator.maxIteration;
-		return isComplete || isStable;
+		return isComplete ;
 	}
 
 	public Market getMarket() {
