@@ -25,6 +25,7 @@ public class FisherSolverDistributed extends FisherSolver {
 
 	public FisherSolverDistributed(Market m, Mailer mailer,int maxIteration, double threshold) {
 		super(m, maxIteration, threshold);
+		this.mailer = mailer;
 		this.goods = m.getGoods();
 		this.buyers = m.getBuyers();
 		this.algorithm();

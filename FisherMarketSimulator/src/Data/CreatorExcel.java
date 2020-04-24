@@ -17,7 +17,7 @@ public class CreatorExcel {
 	public CreatorExcel(Map<Mailer, List<FisherSolver>> fisherSlovers) {
 		super();
 		this.data = new CreatorData(fisherSlovers);
-		this.partName = "buyers_" + MainSimulator.buyersNum + "," + "goods_" + MainSimulator.goodsNum + ","
+		this.partName = "reps_"+(MainSimulator.end-MainSimulator.start)+","+"buyers_" + MainSimulator.buyersNum + "," + "goods_" + MainSimulator.goodsNum + ","
 				+ "thrashold_" + MainSimulator.THRESHOLD + "," + "rnd_" + Math.random();
 	}
 

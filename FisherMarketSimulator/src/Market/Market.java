@@ -95,7 +95,7 @@ public class Market {
 	@Override
 	public String toString() {
 		
-		return id +buyers.size() + "," + goods.size();
+		return id +","+buyers.size() + "," + goods.size();
 
 		
 	}
