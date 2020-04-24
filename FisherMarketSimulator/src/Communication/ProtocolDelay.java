@@ -21,8 +21,10 @@ public abstract class ProtocolDelay {
 		return isTimeStamp;
 	}
 
-	public  static String header() {
-		return "Perfect Communication, Time Stamp Use";
+	@Override
+	public String toString() {
+		// TODO Auto-generated method stub
+		return perfectCommunication+","+isTimeStamp;
 	}
 
 	

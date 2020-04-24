@@ -24,12 +24,10 @@ public class Market {
 	private int[][] imperfectCommunicationMatrix;
 
 
-
 	public Market(int buyersNum, int goodsNum, int i) {
 		this.id = i;
 
 		rUtil = new Random((buyersNum * 10) + (goodsNum * 100) + (i * 1000));
-		//rGoodTypes = new Random((buyersNum * 100) + (goodsNum * 10) + (i * 1000));
 
 		this.goods = createGoods(goodsNum);
 		this.buyers = createBuyers(buyersNum);
@@ -39,6 +37,8 @@ public class Market {
 		this.R = createR();
 	}
 
+
+	
 	private void createImperfectCommunicationMatrix() {
 		this.imperfectCommunicationMatrix = new int[this.buyers.size()][this.goods.size()];
 		for (int i = 0; i < imperfectCommunicationMatrix.length; i++) {
@@ -94,11 +94,10 @@ public class Market {
 
 	@Override
 	public String toString() {
-		String ans = id + "," + buyers.size() + "," + goods.size();
-		if (this.mailer != null) {
-			ans = ans + "," + mailer.toString();
-		}
-		return ans;
+		
+		return id +buyers.size() + "," + goods.size();
+
+		
 	}
 
 	public static String header() {

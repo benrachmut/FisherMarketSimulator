@@ -6,6 +6,11 @@ public class ProtocolDownEl extends ProtocolDown {
 		super(false);
 	}
 	
+	@Override
+	public String toString() {
+		return super.toString();
+	}
+	
 	
 
 }

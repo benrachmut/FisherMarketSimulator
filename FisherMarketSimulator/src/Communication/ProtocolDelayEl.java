@@ -14,11 +14,11 @@ public class ProtocolDelayEl extends ProtocolDelay {
 
 	private Random msgLostRandom, delayNormalRandom, noiseRandom;
 
-	public ProtocolDelayEl(boolean perfectCommunication, boolean isTimeStamp, double gamma, // aka gamma
+	public ProtocolDelayEl( boolean isTimeStamp, double gamma, // aka gamma
 			double sigma, double k, // aka k
 			double h, double delta, double lambda, double lambda_Tag) {
 
-		super(perfectCommunication, isTimeStamp);
+		super(false, isTimeStamp);
 		this.gamma = gamma;
 		this.sigma = sigma;
 		this.k = k;
@@ -44,11 +44,25 @@ public class ProtocolDelayEl extends ProtocolDelay {
 		this.lambda_tag = 0;
 
 	}
-
-	public  static String header() {
-		return ProtocolDelay.header()+",gamma,sigma,k,h,delta,lambda,lambda_tag"; 
+	
+	@Override
+	public String toString() {
 		
+		String ans = 
+		super.toString()+","+
+		this.gamma+","+
+		this.sigma+","+
+		this.k+","+
+		this.h+","+
+		this.delta+","+
+		this.lambda+","+
+		this.lambda_tag;
+		
+		
+		return ans;
 	}
+
+	
 	
 	
 	public void setSeeds(int marketId) {

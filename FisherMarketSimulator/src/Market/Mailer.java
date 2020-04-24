@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Random;
 
 import Communication.ProtocolDown;
+import SimulatorCreators.MainSimulator;
 import Communication.Message;
 import Communication.Messageable;
 import Communication.ProtocolDelay;
@@ -39,14 +40,7 @@ public class Mailer {
 		return delay.toString()+","+down.toString();
 	}
 
-	public static String header() {
-		if (MainSimulator.typeCommunication ==1) {
-			return ProtocolDelayEl.header()+","+ProtocolDown.header();
-		}
-		else {
-			return "";
-		}
-	}
+	
 	
 	public void createMessage(Messageable sender, int decisionCounter, Messageable reciever, double context) {
 		
