@@ -10,6 +10,12 @@ public class ProtocolDownEl extends ProtocolDown {
 	public String toString() {
 		return super.toString();
 	}
+
+	@Override
+	public void setSeeds(int marketId) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 	
 

@@ -19,6 +19,7 @@ public abstract class ProtocolDown {
 	public String toString() {
 		return Boolean.toString(isDown);
 	}
+	public abstract void setSeeds(int marketId);
 	
 	/*
 	private double downSparsity;

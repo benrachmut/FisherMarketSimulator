@@ -15,7 +15,7 @@ import Communication.ProtocolDelayEl;
 public class Mailer {
 	
 	private ProtocolDelay delay;
-	private ProtocolDelay down;
+	private ProtocolDown down;
 
 	private List<Message> messageBox;
 	private int[][] impCommmunicationMatrix;
@@ -24,6 +24,7 @@ public class Mailer {
 	public Mailer(ProtocolDelay delay, ProtocolDown down) {
 		super();
 		this.delay = delay;
+		this.down = down;
 		this.messageBox = new ArrayList<Message>();
 
 	}
