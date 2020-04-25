@@ -26,9 +26,6 @@ public class Market {
 
 	public Market(int buyersNum, int goodsNum, int i) {
 		this.id = i;
-
-		
-
 		this.goods = createGoods(goodsNum);
 		this.buyers = createBuyers(buyersNum);
 

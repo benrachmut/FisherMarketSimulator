@@ -15,11 +15,20 @@ public class CreatorDelaysEl extends CreatorDelays{
 	
 	private  double[] gammas = { 0.02 }; // aka gamma
 	private  double[] sigmas = { 10 };
-	private  double[] ks = { 10 }; // aka k
-	private  double[] hs = { 5 };
-	private  double[] deltas = { 10 };
-	private  double[] lambdas = { 0.5 };
-	private  double[] lambda_tags = { 0.66 };
+	private  double[] ks = { 10,20 }; // aka k
+	
+	
+	private  double n1=0;
+	private  double n2=10;
+	private  double n3=50;
+	private  double n4=200;
+	
+	private  double p1=0.5;
+	private  double p2=0.3;
+	private  double p3=0.2;
+	
+	
+	
 	
 	
 	
@@ -37,16 +46,7 @@ public class CreatorDelaysEl extends CreatorDelays{
 		for (double gamma : gammas) {
 			for (double sigma : sigmas) {
 				for (double k : ks) {
-					for (double h : hs) {
-						for (double delta : deltas) {
-							for (double lambda : lambdas) {
-								for (double lambda_tag : lambda_tags) {
-									ans.add(new ProtocolDelayEl(timestampBoolean, gamma, sigma, k, h, delta,
-											lambda, lambda_tag));
-								}
-							} // lambda
-						} // delta
-					} // h
+					ans.add(new ProtocolDelayEl(timestampBoolean, gamma, sigma, k, n1,n2,n3,n4,p1,p2,p3));
 				} // k
 			} // sigma
 		} // gamma
@@ -54,6 +54,7 @@ public class CreatorDelaysEl extends CreatorDelays{
 	}
 	
 	public String header() {
-		return super.header()+",gamma,sigma,k,h,delta,lambda,lambda_tag"; 
+		return super.header()+",gamma,sigma,k,n1,n2,n3,n4,p1,p2,p3"; 
+		
 	}
 }

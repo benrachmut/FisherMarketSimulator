@@ -23,6 +23,7 @@ public class Good implements Messageable, Comparable<Good> {
 	private SortedMap<Buyer, Message> messageRecived;
 	private double goodChange;
 	private SortedMap<Buyer, Double> allocation;
+	//private boolean recieveMsg;
 	private Buyer assignedBuyer;
 	private boolean withTimeStamp;
 	
@@ -63,7 +64,6 @@ public class Good implements Messageable, Comparable<Good> {
 		this.messageRecived = new TreeMap<Buyer, Message>();
 		this.goodChange = -1;
 		this.allocation = new TreeMap<Buyer, Double>();
-
 	}
 
 	public Map<Buyer, Double> getAllocation() {
@@ -91,8 +91,9 @@ public class Good implements Messageable, Comparable<Good> {
 	}
 
 	private void updateChange(Map<Buyer, Double> lastAllocation) {
+		
 
-		if (lastAllocation.isEmpty()) {
+		if (lastAllocation.isEmpty() ) {
 			this.goodChange = Double.MAX_VALUE;
 		} else {
 			Double changeToUpdate = 0.0;
@@ -104,29 +105,6 @@ public class Good implements Messageable, Comparable<Good> {
 			}
 			this.goodChange = changeToUpdate;
 		}
-
-		// double sumAllocation = 0;
-		/*
-		 * for (Double singleAllocation : allocation.values()) { sumAllocation =
-		 * sumAllocation + singleAllocation; }
-		 */
-		/*
-		 * if (this.goodChange == -1) { this.goodChange = Double.MAX_VALUE; } else {
-		 * goodChange = 0;
-		 * 
-		 * for (Entry<Buyer, Double> e : this.allocation.entrySet()) { Buyer b =
-		 * e.getKey(); double bid = this.bidsRecieved.get(b); double currentAllocation =
-		 * bid/ price; double pastAllocation = e.getValue(); double t= currentAllocation
-		 * - pastAllocation; if (t<0) { t=t*(-1); }
-		 * 
-		 * goodChange += t; }
-		 * 
-		 * /*
-		 * 
-		 * change += Math .abs(((bids[i][j]/ prices[j]) -
-		 * currentAllocation[i][j]));///aaaa
-		 */
-
 	}
 
 	private SortedMap<Buyer, Double> reallocation(double price) {

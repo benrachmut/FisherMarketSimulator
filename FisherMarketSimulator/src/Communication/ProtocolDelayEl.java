@@ -3,47 +3,58 @@ package Communication;
 import java.util.Random;
 
 public class ProtocolDelayEl extends ProtocolDelay {
-
-	private double gamma; // aka gamma
-	private double sigma;
-	private double k; // aka k
-	private double h;
-	private double delta;
-	private double lambda;
-	private double lambda_tag;
-
+	
+	private  double gamma; // aka gamma
+	private  double sigma;
+	private  double k; // aka k
+	
+	
+	private  double n1;
+	private  double n2;
+	private  double n3;
+	private  double n4;
+	
+	private  double p1;
+	private  double p2;
+	private  double p3;
+	
 	private Random msgLostRandom, delayNormalRandom, noiseRandom;
 
-	public ProtocolDelayEl( boolean isTimeStamp, double gamma, // aka gamma
-			double sigma, double k, // aka k
-			double h, double delta, double lambda, double lambda_Tag) {
 
+	public ProtocolDelayEl( boolean isTimeStamp, double gamma, double sigma, double k,
+			double n1, double n2, double n3, double n4, double p1, double p2, double p3) {
 		super(false, isTimeStamp);
 		this.gamma = gamma;
 		this.sigma = sigma;
 		this.k = k;
-
-		this.gamma = gamma;
-		this.sigma = sigma;
-		this.k = k; // aka k
-		this.h = h;
-		this.delta = delta;
-		this.lambda = lambda;
-		this.lambda_tag = lambda_Tag;
-
+		this.n1 = n1;
+		this.n2 = n2;
+		this.n3 = n3;
+		this.n4 = n4;
+		this.p1 = p1;
+		this.p2 = p2;
+		this.p3 = p3;
 	}
 
+
+	
 	public ProtocolDelayEl() {
 		super(true, false);
-		this.gamma = 0;
-		this.sigma = 0;
-		this.k = 0;
-		this.h = 0;
-		this.delta = 0;
-		this.lambda = 0;
-		this.lambda_tag = 0;
+		gamma=0; // aka gamma
+		sigma=0;
+		k=0; // aka k
+		
+		n1=0;
+		n2=0;
+		n3=0;
+		n4=0;
+		
+		p1=0;
+		p2=0;
+		p3=0;
 
 	}
+	
 	
 	@Override
 	public String toString() {
@@ -53,10 +64,15 @@ public class ProtocolDelayEl extends ProtocolDelay {
 		this.gamma+","+
 		this.sigma+","+
 		this.k+","+
-		this.h+","+
-		this.delta+","+
-		this.lambda+","+
-		this.lambda_tag;
+		
+		this.n1+","+
+		this.n2+","+
+		this.n3+","+
+		this.n4+","+
+		
+		this.p1+","+
+		this.p2+","+
+		this.p3;
 		
 		
 		return ans;
@@ -67,7 +83,7 @@ public class ProtocolDelayEl extends ProtocolDelay {
 	
 	public void setSeeds(int marketId) {
 		long seed1 = marketId * 1000 + (int) ((1 - gamma) * 100) + (int) (sigma * 10);
-		long seed2 = marketId * 1000 + (int) (k * 100) + (int) (delta * 10);
+		long seed2 = marketId * 1000 + (int) (k * 100) + (int) (n4 * 10);
 		long seed3 = marketId * 1000 + (int) (sigma * 100) + (int) (k * 10);
 
 		delayNormalRandom = new Random(seed1);
@@ -89,8 +105,7 @@ public class ProtocolDelayEl extends ProtocolDelay {
 
 		else {
 
-			double n = this.h + getNij(p_ij);
-
+			double n = getNij();
 			double mu = k + p_ij * n;
 			double z = delayNormalRandom.nextGaussian();
 			double ans = z * this.sigma + mu;
@@ -99,27 +114,28 @@ public class ProtocolDelayEl extends ProtocolDelay {
 
 	}
 
-	private double getNij(double p_ij) {
+	private double getNij() {
 
 		double rnd = this.noiseRandom.nextDouble();
 		
-		double prob1 = this.lambda * p_ij;
-		double prob2 = (1 - this.lambda * p_ij) * this.lambda_tag;
-		double prob3 = (1 - this.lambda * p_ij)* (1-this.lambda_tag);
-		
-		double prob2Cumelative=prob1 + prob2; 
-		double prob3Cumelative= prob2Cumelative+prob3;
-
+		double prob1 = this.p1;
+		double prob2 = this.p1+this.p2;
+		double prob3 = this.p1+this.p2+this.p3;
 		
 		if (rnd < prob1) {
-			return this.h;
+			return n1;
 		}
-		if (rnd >= this.lambda * p_ij && rnd < prob2Cumelative) {
-			return this.h * delta;
+		if (rnd >= prob1 && rnd < prob2) {
+			return n2;
+		} 
+		if (rnd >= prob2 && rnd < prob3) {
+			return n3;
 		} else {
-			return this.h * delta * delta;
+			return n4;
 
 		}
+		
+		
 	}
 
 	/*

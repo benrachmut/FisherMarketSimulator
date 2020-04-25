@@ -20,16 +20,16 @@ public class MainSimulator {
 	// -------------**MARKET PARAMETERS**-------------
 	public static boolean central = false;// run the algorithm synchronous or asynchronous
 	public static final double THRESHOLD = 1E-4;// delta of converges
-	public static double stdUtil = 100;// parameters for withdrawing utilities
+	public static double stdUtil = 150;// parameters for withdrawing utilities
 	public static double muUtil = 500;// parameters for withdrawing utilities
-	public static int buyersNum = 3;// number of buyers in market
-	public static int goodsNum = 4;// number of goods in market
+	public static int buyersNum = 6;// number of buyers in market
+	public static int goodsNum = 9;// number of goods in market
 
 	// -------------**SIMULATOR**-------------
 	public static int start = 0;// number of trials, start
 	public static int end = 100;// number of trials, end
 	public static int maxIteration = 1000;// if algorithm does not converge what is the upper bound avoid inf loop
-	public static double epsilonEnvyFree = 0.00005;
+	public static double epsilonEnvyFree = 0.05;
 	public static boolean printForDebug = false;
 	public static boolean envyDebug = false;
 
@@ -64,6 +64,9 @@ public class MainSimulator {
 	private static void runCentralistic(List<Market> markets) {
 		List<FisherSolver> list = new ArrayList<FisherSolver>();
 		for (Market market : markets) {
+			if (market.getId() == 33) {
+				System.out.println();
+			}
 			FisherSolver fs = new FisherSolverCentralistic(market, maxIteration, THRESHOLD);
 			list.add(fs);
 		}

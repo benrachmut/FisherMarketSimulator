@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Set;
 
 import Communication.Message;
 import Communication.Messageable;
@@ -64,18 +65,33 @@ public class FisherSolverDistributed extends FisherSolver {
 		//mailer.printMailBox();
 		
 		List<Message> msgToSend = mailer.handleDelay();
-		sendMessages(msgToSend);
+		Set<Good> goodsRecieve = sendMessages(msgToSend);
 		this.allocation = createCentralisticAllocation();
 		updateChange();
-		//FisherData ans = new FisherDataDistributed(this.allocation, this.R, this.iterations, this.market, this.mailer);
+		if (change == 0) {
+			change = Double.MAX_VALUE;
+		}
+		
+		//checkIfChangeIsValid(goodsRecieve);
 		return this.allocation;
 	}
 
-	private void sendMessages(List<Message> msgToSend) {
+
+/*
+	private void checkIfChangeIsValid(Set<Good> goodsRecieve) {
+		for (Good good : this.market.getGoods()) {
+			if (!goodsRecieve.contains(good)) {
+				this.change = Double.MAX_VALUE;
+			}
+		}	
+	}
+*/
+	private Set<Good> sendMessages(List<Message> msgToSend) {
 		SortedMap<Buyer, List<Message>> recieversMapBuyer = createReciversMapBuyer(msgToSend);
 		sendMessagesBuyers(recieversMapBuyer);
 		SortedMap<Good, List<Message>> recieversMapGood = createReciversMapGood(msgToSend);
 		sendMessagesGoods(recieversMapGood);
+		return recieversMapGood.keySet();
 	}
 
 	private void sendMessagesGoods(SortedMap<Good, List<Message>> recieversMapGood) {
