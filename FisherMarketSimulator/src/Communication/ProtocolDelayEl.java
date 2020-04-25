@@ -102,10 +102,19 @@ public class ProtocolDelayEl extends ProtocolDelay {
 	private double getNij(double p_ij) {
 
 		double rnd = this.noiseRandom.nextDouble();
-		if (rnd < this.lambda * p_ij) {
+		
+		double prob1 = this.lambda * p_ij;
+		double prob2 = (1 - this.lambda * p_ij) * this.lambda_tag;
+		double prob3 = (1 - this.lambda * p_ij)* (1-this.lambda_tag);
+		
+		double prob2Cumelative=prob1 + prob2; 
+		double prob3Cumelative= prob2Cumelative+prob3;
+
+		
+		if (rnd < prob1) {
 			return this.h;
 		}
-		if (rnd >= this.lambda * p_ij && rnd < (1 - this.lambda * p_ij) * this.lambda_tag) {
+		if (rnd >= this.lambda * p_ij && rnd < prob2Cumelative) {
 			return this.h * delta;
 		} else {
 			return this.h * delta * delta;

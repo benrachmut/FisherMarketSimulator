@@ -22,8 +22,12 @@ public class CreatorExcel {
 	}
 
 	private static String createHeader() {
-		return MainSimulator.creatorDelay.header() + "," + MainSimulator.creatorDown.header() + "," + Market.header()
-				+ "," + FisherSolver.header();
+		String ans = MainSimulator.creatorDelay.header()+",";
+		ans= ans+MainSimulator.creatorDown.header() + ",";
+		ans = ans + Market.header()+ ",";
+		ans = ans + FisherSolver.header();
+
+		return  ans;
 	}
 
 	public void createRawData() {
@@ -49,9 +53,12 @@ public class CreatorExcel {
 		try {
 			FileWriter s = new FileWriter(name+","+this.partName+ ".csv");
 			out = new BufferedWriter(s);
-			String header = createHeader();
-			out.write(header);
-			out.newLine();
+			if (MainSimulator.central==false) {
+				String header = createHeader();
+				out.write(header);
+				out.newLine();
+			}
+			
 			for (String o : data) {
 				out.write(o);
 				out.newLine();

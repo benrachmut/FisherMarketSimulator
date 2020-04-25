@@ -30,36 +30,21 @@ public class CreatorData {
 
 	}
 
-	
-	
-	
 	public List<String> getRawData() {
 		return rawData;
 	}
-
-
-
 
 	public List<String> getAvgData() {
 		return avgData;
 	}
 
-
-
-
 	public List<String> getRawLast() {
 		return rawLast;
 	}
 
-
-
-
 	public List<String> getAvgLast() {
 		return avgLast;
 	}
-
-
-
 
 	private void initDataLists() {
 		rawData = new ArrayList<String>();
@@ -77,35 +62,34 @@ public class CreatorData {
 	}
 
 	private void createAvgLast() {
-		String marketData = -1 + ","+MainSimulator.buyersNum + "," + MainSimulator.goodsNum;
-		
+		String marketData = -1 + "," + MainSimulator.buyersNum + "," + MainSimulator.goodsNum;
+
 		for (Entry<Mailer, List<FisherSolver>> differentMarketsPerSingleMailer : fisherSolvers.entrySet()) {
 			String mailerData = differentMarketsPerSingleMailer.getKey().toString();
 			List<FisherSolver> toAverage = differentMarketsPerSingleMailer.getValue();
 
-				Collection<Integer> iterations = new ArrayList<Integer>();
-				Collection<Double> rxs = new ArrayList<Double>();
-				Collection<Double> envyFrees = new ArrayList<Double>();
-				for (FisherSolver fs : toAverage) {
-					
-					Integer lastIter = fs.getLastIteration();
-					
-					iterations.add(lastIter);
-					rxs.add(fs.getRx(lastIter));
-					envyFrees.add(fs.getEnvyFree(lastIter));
-				}
-				double iterationAvg = calcAverageInteger(iterations);
-				double rxAvg = calcAverageDouble(rxs);
-				double envyFreesAvg = calcAverageDouble(envyFrees);
-				
-				String fisherData = MainSimulator.maxIteration + "," + MainSimulator.THRESHOLD + "," + iterationAvg + "," + rxAvg
-						+ "," + envyFreesAvg;
+			Collection<Integer> iterations = new ArrayList<Integer>();
+			Collection<Double> rxs = new ArrayList<Double>();
+			Collection<Double> envyFrees = new ArrayList<Double>();
+			for (FisherSolver fs : toAverage) {
 
-				avgLast.add(mailerData + "," + marketData + "," + fisherData);
+				Integer lastIter = fs.getLastIteration();
 
-			
+				iterations.add(lastIter);
+				rxs.add(fs.getRx(lastIter));
+				envyFrees.add(fs.getEnvyFree(lastIter));
+			}
+			double iterationAvg = calcAverageInteger(iterations);
+			double rxAvg = calcAverageDouble(rxs);
+			double envyFreesAvg = calcAverageDouble(envyFrees);
+
+			String fisherData = MainSimulator.maxIteration + "," + MainSimulator.THRESHOLD + "," + iterationAvg + ","
+					+ rxAvg + "," + envyFreesAvg;
+
+			avgLast.add(mailerData + "," + marketData + "," + fisherData);
+
 		}
-		
+
 	}
 
 	private void createRawLast() {
@@ -120,7 +104,7 @@ public class CreatorData {
 	}
 
 	private void createAvgData() {
-		String marketData = -1 + ","+MainSimulator.buyersNum + "," + MainSimulator.goodsNum;
+		String marketData = -1 + "," + MainSimulator.buyersNum + "," + MainSimulator.goodsNum;
 		for (Entry<Mailer, List<FisherSolver>> differentMarketsPerSingleMailer : fisherSolvers.entrySet()) {
 			String mailerData = differentMarketsPerSingleMailer.getKey().toString();
 			List<FisherSolver> toAverage = differentMarketsPerSingleMailer.getValue();
@@ -144,8 +128,6 @@ public class CreatorData {
 
 	}
 
-
-
 	private void createRawData() {
 		for (Entry<Mailer, List<FisherSolver>> differentMarketsPerSingleMailer : fisherSolvers.entrySet()) {
 			String mailerData = differentMarketsPerSingleMailer.getKey().toString();
@@ -161,8 +143,7 @@ public class CreatorData {
 
 		}
 	}
-	
-	
+
 	public static double calcAverageDouble(Collection<Double> vector) {
 		double sum = 0.0;
 		for (Double d : vector) {
@@ -170,11 +151,11 @@ public class CreatorData {
 		}
 		return sum / vector.size();
 	}
-	
+
 	public static double calcAverageInteger(Collection<Integer> vector) {
 		double sum = 0.0;
 		for (Integer d : vector) {
-			sum = sum + (double)d;
+			sum = sum + (double) d;
 		}
 		return sum / vector.size();
 	}

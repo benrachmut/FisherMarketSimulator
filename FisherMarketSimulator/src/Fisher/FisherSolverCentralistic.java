@@ -26,6 +26,7 @@ public class FisherSolverCentralistic extends FisherSolver {
 		updatePriceVectorUsingBids();
 		updateCurrentAllocationMatrixAndChanges();
 		
+		this.algorithm();
 	}
 
 	// next iteration: calculates prices, calculates current valuation and
@@ -112,6 +113,7 @@ public class FisherSolverCentralistic extends FisherSolver {
 		return currentAllocation;
 	}
 
+	/*
 	@Override
 	public String toString() {
 
@@ -142,6 +144,7 @@ public class FisherSolverCentralistic extends FisherSolver {
 
 		return sb.toString();
 	}
+	*/
 
 	// -----------METHODS OF CONSTRUCTOR------
 

@@ -16,7 +16,7 @@ public class Market {
 	private int id;
 	private List<Buyer> buyers;
 	private List<Good> goods;
-	private Random rUtil, rGoodTypes;
+	private Random rUtil;
 	private Utility[][] R;
 
 	private Mailer mailer;
@@ -27,7 +27,7 @@ public class Market {
 	public Market(int buyersNum, int goodsNum, int i) {
 		this.id = i;
 
-		rUtil = new Random((buyersNum * 10) + (goodsNum * 100) + (i * 1000));
+		
 
 		this.goods = createGoods(goodsNum);
 		this.buyers = createBuyers(buyersNum);
@@ -108,7 +108,7 @@ public class Market {
 		List<Buyer> ans = new ArrayList<Buyer>();
 
 		for (int i = 0; i < buyersNum; i++) {
-			Buyer b = new Buyer(i, goods);
+			Buyer b = new Buyer(i, goods, this.id);
 			ans.add(b);
 		}
 		return ans;

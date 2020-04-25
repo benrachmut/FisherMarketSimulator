@@ -5,9 +5,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import Communication.ProtocolDelay;
+import Communication.ProtocolDelayEl;
 import Communication.ProtocolDown;
+import Communication.ProtocolDownEl;
 import Data.CreatorExcel;
 import Fisher.FisherSolver;
+import Fisher.FisherSolverCentralistic;
 import Fisher.FisherSolverDistributed;
 import Market.Mailer;
 import Market.Market;
@@ -16,17 +19,17 @@ public class MainSimulator {
 
 	// -------------**MARKET PARAMETERS**-------------
 	public static boolean central = false;// run the algorithm synchronous or asynchronous
-	public static final double THRESHOLD = 1E-10;// delta of converges
+	public static final double THRESHOLD = 1E-4;// delta of converges
 	public static double stdUtil = 100;// parameters for withdrawing utilities
 	public static double muUtil = 500;// parameters for withdrawing utilities
-	public static int buyersNum = 6;// number of buyers in market
-	public static int goodsNum = 9;// number of goods in market
+	public static int buyersNum = 3;// number of buyers in market
+	public static int goodsNum = 4;// number of goods in market
 
 	// -------------**SIMULATOR**-------------
 	public static int start = 0;// number of trials, start
-	public static int end = 40;// number of trials, end
+	public static int end = 100;// number of trials, end
 	public static int maxIteration = 1000;// if algorithm does not converge what is the upper bound avoid inf loop
-	public static double epsilonEnvyFree = 0.05;
+	public static double epsilonEnvyFree = 0.00005;
 	public static boolean printForDebug = false;
 	public static boolean envyDebug = false;
 
@@ -45,13 +48,28 @@ public class MainSimulator {
 	public static void main(String[] args) {
 
 		List<Market> markets = createMarkets();
-		List<Mailer> mailers = createCommunicationProtocols();
-
-		for (Mailer singleMailer : mailers) {
-			iterateMailerOverAllMarkets(singleMailer, markets);
+		if (central) {
+			runCentralistic(markets);
+		} else {
+			List<Mailer> mailers = createCommunicationProtocols();
+			for (Mailer singleMailer : mailers) {
+				iterateMailerOverAllMarkets(singleMailer, markets);
+			}
 		}
+		
 		createExcel();
 
+	}
+
+	private static void runCentralistic(List<Market> markets) {
+		List<FisherSolver> list = new ArrayList<FisherSolver>();
+		for (Market market : markets) {
+			FisherSolver fs = new FisherSolverCentralistic(market, maxIteration, THRESHOLD);
+			list.add(fs);
+		}
+		
+		Mailer m = new Mailer(new ProtocolDelayEl(), new ProtocolDownEl());
+		fisherSolvers.put(m, list);
 	}
 
 	/**
@@ -130,8 +148,9 @@ public class MainSimulator {
 		for (Market market : markets) {
 			mailer.resetMailer(market.getId(), market.getImperfectCommunicationMatrix());
 			market.meetMailer(mailer);
-			FisherSolver fs = new FisherSolverDistributed(market,mailer, maxIteration, THRESHOLD);
+			FisherSolver fs = new FisherSolverDistributed(market, mailer, maxIteration, THRESHOLD);
 			list.add(fs);
+			System.out.println(market);
 		}
 		fisherSolvers.put(mailer, list);
 	}

@@ -126,17 +126,7 @@ public class FisherSolverDistributed extends FisherSolver {
 		}
 		return ans;
 	}
-/*
-	private void printMsgsToSend(List<Message> msgToSend) {
-		int count = 0;
-		for (Message message : msgToSend) {
 
-			System.out.println("message number: " + count + ", " + message);
-			count++;
-		}
-
-	}
-*/
 	private void updateChange() {
 		double ans = 0.0;
 		for (Good g : this.goods) {
@@ -150,49 +140,6 @@ public class FisherSolverDistributed extends FisherSolver {
 		this.change = ans;
 
 	}
-/*
-	private void updateStability() {
-		this.change = 0;
-		for (Good t : goods) {
-			this.change = this.change + t.getGoodChanges();
-		}
-	}
-*/
-	/*
-	private void sendMessages(Map<Messageable, List<Message>> receiversMap) {
-		for (Entry<Messageable, List<Message>> e : receiversMap.entrySet()) {
-			Messageable reciever = e.getKey();
-			List<Message> msgsRecieved = e.getValue();
-			reciever.recieveMessage(msgsRecieved);
-		}
-	}
-*/
-
-	/*
-	private Map<Messageable, List<Message>> createReciversMap(List<Message> msgToSend) {
-		Map<Messageable, List<Message>> ans = new HashMap<Messageable, List<Message>>();
-		for (Message m : msgToSend) {
-			Messageable reciever = m.getReciever();
-			if (!ans.containsKey(reciever)) {
-				List<Message> l = new ArrayList<Message>();
-				ans.put(reciever, l);
-			}
-			ans.get(reciever).add(m);
-		}
-		return ans;
-	}
-*/
-	// next iteration: calculates prices, calculates current valuation and
-	// update the bids
-
-	/*
-	 * public Double[][] iterate() { updateBidsUsingValutations();
-	 * updatePriceVectorUsingBids(); updateCurrentChanges();
-	 * updateCurrentAllocationMatrix();
-	 * 
-	 * //updateCurrentAllocationMatrixAndChanges(); //generateAllocations(); return
-	 * currentAllocation; }
-	 */
 
 	// -----------METHODS OF iterate------
 

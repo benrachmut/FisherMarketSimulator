@@ -33,9 +33,9 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 	private boolean withTimeStamp;
 
 	
-	public Buyer(int i, List<Good> goods) {
+	public Buyer(int i, List<Good> goods, int marketId) {
 		this.id=i;
-		this.randomUtil =new Random( goods.size()*10+i*100 );
+		this.randomUtil =new Random( goods.size()*10+i*100+marketId*1000 );
 		this.utilitiesMap = createUtils(goods);
 		this.goodsResponsibility=new TreeSet<Good>();
 	}
