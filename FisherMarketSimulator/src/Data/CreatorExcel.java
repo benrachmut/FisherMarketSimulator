@@ -2,8 +2,11 @@ package Data;
 
 import java.io.BufferedWriter;
 import java.io.FileWriter;
+import java.security.Timestamp;
+import java.sql.Time;
 import java.util.List;
 import java.util.Map;
+import java.util.Timer;
 
 import Fisher.FisherSolver;
 import Market.Mailer;
@@ -18,7 +21,7 @@ public class CreatorExcel {
 		super();
 		this.data = new CreatorData(fisherSlovers);
 		this.partName = "reps_"+(MainSimulator.end-MainSimulator.start)+","+"buyers_" + MainSimulator.buyersNum + "," + "goods_" + MainSimulator.goodsNum + ","
-				+ "thrashold_" + MainSimulator.THRESHOLD + "," + "rnd_" + Math.random();
+				+ "thrashold_" + MainSimulator.THRESHOLD+",rnd_"+Math.random();
 	}
 
 	private static String createHeader() {

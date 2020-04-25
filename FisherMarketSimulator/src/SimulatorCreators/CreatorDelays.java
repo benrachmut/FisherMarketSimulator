@@ -16,7 +16,7 @@ import Communication.ProtocolDown;
  */
 public abstract class CreatorDelays  {
 
-	protected boolean[] perfectCommunications={false};
+	protected boolean[] perfectCommunications={true,false};
 	protected boolean[] isTimeStamps = { true, false };
 	
 	

@@ -59,6 +59,9 @@ public class Mailer {
 		double p_ij = 1.0;
 		try {
 			Integer randomDelay = delay.createDelay(q_ij,p_ij);
+			if (randomDelay<0) {
+				randomDelay=0;
+			}
 			Message m = new Message(sender, decisionCounter, reciever, context, randomDelay);
 			this.messageBox.add(m);
 		} catch (NullPointerException e) {

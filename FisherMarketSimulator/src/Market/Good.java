@@ -137,11 +137,13 @@ public class Good implements Messageable, Comparable<Good> {
 			Messageable sender = m.getSender();
 			Buyer p = (Buyer) sender;
 
-			if (!ignoreMessage || !withTimeStamp) {
+			if ((ignoreMessage == false && withTimeStamp==true) || withTimeStamp == false) {
 				this.messageRecived.put(p, m);
 				double bid = m.getContext();
 				this.bidsRecieved.put(p, bid);
 			}
+			
+		
 		}
 
 	}

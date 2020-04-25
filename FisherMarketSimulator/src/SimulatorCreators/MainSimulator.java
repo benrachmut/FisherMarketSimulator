@@ -17,18 +17,19 @@ import Market.Market;
 
 public class MainSimulator {
 
+	static int counter;
 	// -------------**MARKET PARAMETERS**-------------
 	public static boolean central = false;// run the algorithm synchronous or asynchronous
-	public static final double THRESHOLD = 1E-4;// delta of converges
+	public static final double THRESHOLD = 1E-8;// delta of converges
 	public static double stdUtil = 150;// parameters for withdrawing utilities
 	public static double muUtil = 500;// parameters for withdrawing utilities
-	public static int buyersNum = 6;// number of buyers in market
-	public static int goodsNum = 9;// number of goods in market
+	public static int buyersNum = 8;// number of buyers in market
+	public static int goodsNum = 6;// number of goods in market
 
 	// -------------**SIMULATOR**-------------
 	public static int start = 0;// number of trials, start
 	public static int end = 100;// number of trials, end
-	public static int maxIteration = 1000;// if algorithm does not converge what is the upper bound avoid inf loop
+	public static int maxIteration = 10000;// if algorithm does not converge what is the upper bound avoid inf loop
 	public static double epsilonEnvyFree = 0.05;
 	public static boolean printForDebug = false;
 	public static boolean envyDebug = false;
@@ -55,10 +56,8 @@ public class MainSimulator {
 			for (Mailer singleMailer : mailers) {
 				iterateMailerOverAllMarkets(singleMailer, markets);
 			}
-		}
-		
+		}	
 		createExcel();
-
 	}
 
 	private static void runCentralistic(List<Market> markets) {
@@ -153,8 +152,9 @@ public class MainSimulator {
 			market.meetMailer(mailer);
 			FisherSolver fs = new FisherSolverDistributed(market, mailer, maxIteration, THRESHOLD);
 			list.add(fs);
-			System.out.println(market);
 		}
+		System.out.println("done reps "+ (counter++));
+
 		fisherSolvers.put(mailer, list);
 	}
 

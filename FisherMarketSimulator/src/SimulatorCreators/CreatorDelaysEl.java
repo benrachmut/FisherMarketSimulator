@@ -13,19 +13,19 @@ import Communication.ProtocolDown;
 public class CreatorDelaysEl extends CreatorDelays{
 
 	
-	private  double[] gammas = { 0.02 }; // aka gamma
+	private  double[] gammas = { 0 }; // aka gamma
 	private  double[] sigmas = { 10 };
-	private  double[] ks = { 10,20 }; // aka k
+	private  double[] ks = { 10,25,50,75,100 }; // aka k
 	
 	
 	private  double n1=0;
-	private  double n2=10;
-	private  double n3=50;
-	private  double n4=200;
+	private  double n2=0;
+	private  double n3=0;
+	private  double n4=0;
 	
-	private  double p1=0.5;
-	private  double p2=0.3;
-	private  double p3=0.2;
+	private  double p1=1;
+	private  double p2=0;
+	private  double p3=0;
 	
 	
 	
