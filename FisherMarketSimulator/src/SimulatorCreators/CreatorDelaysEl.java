@@ -14,8 +14,8 @@ public class CreatorDelaysEl extends CreatorDelays{
 
 	
 	private  double[] gammas = { 0 }; // aka gamma
-	private  double[] sigmas = { 10 };
-	private  double[] ks = { 10,25,50,75,100 }; // aka k
+	private  double[] sigmas = {5,10,25,50,100};//{ 5,10,25,50 };
+	private  double[] ks = {25};//{5,10,25,50,100,200 }; // aka k
 	
 	
 	private  double n1=0;

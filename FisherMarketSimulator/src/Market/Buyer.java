@@ -160,8 +160,7 @@ public class Buyer implements Messageable , Comparable<Buyer> {
 			checkIfBug(sender);
 			Good t = (Good)sender;
 
-			if (!ignoreMessage || !withTimeStamp) {		
-				this.messageRecived.put(t, m);
+			if ((ignoreMessage == false && withTimeStamp==true) || withTimeStamp == false) {				this.messageRecived.put(t, m);
 				double allocation  = m.getContext();
 				Utility u = utilitiesMap.get(t);
 				Double updatedUtility= u.getUtility(allocation);

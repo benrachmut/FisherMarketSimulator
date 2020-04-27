@@ -16,11 +16,8 @@ public class Market {
 	private int id;
 	private List<Buyer> buyers;
 	private List<Good> goods;
-	private Random rUtil;
 	private Utility[][] R;
-
 	private Mailer mailer;
-
 	private int[][] imperfectCommunicationMatrix;
 
 

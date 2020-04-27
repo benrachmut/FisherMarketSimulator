@@ -39,7 +39,7 @@ public class ProtocolDelayEl extends ProtocolDelay {
 
 	
 	public ProtocolDelayEl() {
-		super(true, false);
+		super(true, true);
 		gamma=0; // aka gamma
 		sigma=0;
 		k=0; // aka k

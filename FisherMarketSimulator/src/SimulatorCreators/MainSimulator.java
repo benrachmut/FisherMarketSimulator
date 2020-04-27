@@ -23,14 +23,14 @@ public class MainSimulator {
 	public static final double THRESHOLD = 1E-8;// delta of converges
 	public static double stdUtil = 150;// parameters for withdrawing utilities
 	public static double muUtil = 500;// parameters for withdrawing utilities
-	public static int buyersNum = 8;// number of buyers in market
-	public static int goodsNum = 6;// number of goods in market
+	public static int buyersNum = 6;// number of buyers in market
+	public static int goodsNum = 15;// number of goods in market
 
 	// -------------**SIMULATOR**-------------
 	public static int start = 0;// number of trials, start
 	public static int end = 100;// number of trials, end
-	public static int maxIteration = 10000;// if algorithm does not converge what is the upper bound avoid inf loop
-	public static double epsilonEnvyFree = 0.05;
+	public static int maxIteration = 5000;// if algorithm does not converge what is the upper bound avoid inf loop
+	public static double epsilonEnvyFree = 0.5;
 	public static boolean printForDebug = false;
 	public static boolean envyDebug = false;
 
