@@ -3,12 +3,11 @@ package Communication;
 import java.util.Random;
 
 public class ProtocolDelayEl extends ProtocolDelay {
-	
-	private  double gamma; // aka gamma
+	//public static double counterAll; //  for debug
+	//public static double counterGamma;// for debug
+	private double gamma; // aka gamma
 	private  double sigma;
 	private  double k; // aka k
-	
-	
 	private  double n1;
 	private  double n2;
 	private  double n3;
@@ -93,13 +92,14 @@ public class ProtocolDelayEl extends ProtocolDelay {
 
 	@Override
 	public Integer createDelay(double q_ij, double p_ij) {
-
 		if (perfectCommunication || q_ij == 0) {
 			return 0;
 		}
+		//counterAll ++;
 
 		double pLost = msgLostRandom.nextDouble();
 		if (pLost < this.gamma) {
+		//	counterGamma++;
 			return null;
 		}
 
@@ -137,21 +137,12 @@ public class ProtocolDelayEl extends ProtocolDelay {
 		
 		
 	}
+	
+	// for debug
+	public double getGamma(){
+		return this.gamma;
+	}
 
-	/*
-	 * public ProtocolDelayEl() { perfectCommunication = true; }
-	 * 
-	 * public ProtocolDelay(double dealyConstantSparsity, double delayConstant,
-	 * double dealyNoiseSparsity, double mu, double std, boolean
-	 * considerDecisionCounter) { super(); this.dealyConstantSparsity =
-	 * dealyConstantSparsity; this.delayConstant = delayConstant;
-	 * this.dealyNoiseSparsity = dealyNoiseSparsity; this.mu = mu; this.std = std;
-	 * this.perfectCommunication = false; this.timeStamp=considerDecisionCounter;
-	 * 
-	 * }
-	 * 
-	 * 
-	 * 
-	 */
+
 
 }

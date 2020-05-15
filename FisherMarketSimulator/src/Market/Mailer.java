@@ -98,4 +98,10 @@ public class Mailer {
 	public boolean isWithTimeStamp() {
 		return this.delay.isWithTimeStamp();
 	}
+
+	// for debug
+	public ProtocolDelay getDelay() {
+		// TODO Auto-generated method stub
+		return this.delay;
+	}
 }

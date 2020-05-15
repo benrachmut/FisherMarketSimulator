@@ -36,11 +36,12 @@ public abstract class CreatorDelays  {
 				for (boolean isTimeStamp : isTimeStamps) {
 					ans.addAll(createCombinationsDelay(isTimeStamp));
 				}
-			}
+			
 		}
-		return ans;
 	}
-	
+		return ans;
+
+	}
 
 	protected abstract  ProtocolDelay createDefultProtocol();
 

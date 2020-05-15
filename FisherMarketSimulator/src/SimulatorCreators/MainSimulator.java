@@ -63,9 +63,6 @@ public class MainSimulator {
 	private static void runCentralistic(List<Market> markets) {
 		List<FisherSolver> list = new ArrayList<FisherSolver>();
 		for (Market market : markets) {
-			if (market.getId() == 33) {
-				System.out.println();
-			}
 			FisherSolver fs = new FisherSolverCentralistic(market, maxIteration, THRESHOLD);
 			list.add(fs);
 		}
@@ -148,12 +145,20 @@ public class MainSimulator {
 	private static void iterateMailerOverAllMarkets(Mailer mailer, List<Market> markets) {
 		List<FisherSolver> list = new ArrayList<FisherSolver>();
 		for (Market market : markets) {
+			//ProtocolDelayEl.counterAll = 0; debug
+			//ProtocolDelayEl.counterGamma = 0; debug
+
 			mailer.resetMailer(market.getId(), market.getImperfectCommunicationMatrix());
 			market.meetMailer(mailer);
 			FisherSolver fs = new FisherSolverDistributed(market, mailer, maxIteration, THRESHOLD);
 			list.add(fs);
+			//debug
+			//double actuatlNotD = ProtocolDelayEl.counterGamma/ProtocolDelayEl.counterAll;
+			//System.out.println("gamma input: "+ ((ProtocolDelayEl) mailer.getDelay()).getGamma()+", actual msgs that were not delieverd: "+  actuatlNotD);
+
 		}
 		System.out.println("done reps "+ (counter++));
+		
 
 		fisherSolvers.put(mailer, list);
 	}
